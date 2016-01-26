@@ -13,8 +13,24 @@ def get_dirs(path):
     all_in_dir=os.listdir(path)
     files= [f for f in all_in_dir  
               if is_file(f,path)]
-    dirs.sort()
-    return dirs
+    files.sort()
+    return files
+
+def conversion(in_path,out_path,conv):
+    make_dir(out_path)
+    paths=get_files(in_path)
+    in_paths=append_path(in_path,paths)
+    out_paths=append_path(out_path,paths)
+    for in_i,out_i in zip(in_paths,out_paths):
+        print(in_i)
+        conv(in_i,out_i)
+
+def dir_to_txt(in_path,out_path):
+    dir_content=get_dirs(in_path)
+    dir_content=append_path(in_path,dir_content)
+    text="\n".join(dir_content)
+    save_string(out_path,text)
+    print(text)
 
 def read_file(path):
     file_object = open(path,'r')
