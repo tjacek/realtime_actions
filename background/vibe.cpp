@@ -26,6 +26,10 @@ Action::Action(vector<std::string> names){
   height=first.cols;
 }
 
+ Mat Action::empty_frame(){
+   return Mat::zeros(width,height,CV_8UC1);
+ }
+
 BackgroundModel * create_background(VibeParams &params,Action &action){
   return new BackgroundModel(params.nbSamples,action.width,action.height);
 }
@@ -34,17 +38,19 @@ Mat Action::operator[](int i){
   return frames[i];
 }
 
-void vibe(string in_path){
+void vibe(string in_path,string out_path){
   VibeParams params;
   vector<std::string> filenames=read_lines(in_path);
   Action action(filenames);
   BackgroundModel * model=create_background(params,action);
+  vector<Mat> foreground;
   for(int t=0;t<action.length;t++){
   	Mat frame=action[t];
+  	Mat new_frame=action.empty_frame();
   	for(int i=0;i<action.width;i++){
   	  for(int j=0;j<action.height;j++){
   	    uchar value=frame.at<uchar>(i,j);
-  	    show_value(value);
+  	    
         int count=model->compare(i,j,value,params);
 		bool isInBackground=  (count >= params.reqMatches);
 		if(isInBackground){
@@ -54,10 +60,16 @@ void vibe(string in_path){
 		  if(params.decideUpdate()){
 			model->updateNeighbor(i,j,value ,params);
 		  }
+
+        }else{
+          show_value(value);
+          new_frame.at<uchar>(i,j)=value;	
         }
       }
     }
+    foreground.push_back(new_frame);
   }
+  save_action(out_path,foreground);
 }
 
 BackgroundModel::BackgroundModel(int size,int width,int height){
@@ -102,11 +114,10 @@ void BackgroundModel::update(int x,int y,uchar point ,VibeParams & vibeParams){
   samples[vibeParams.getRand()].at<uchar>(x,y)=point;
 }
 
-
 VibeParams::VibeParams(){
   this->nbSamples = 10;                  
   this->reqMatches = 1;                   
-  this->radius = 2;                     
+  this->radius = 20;                     
   this->subsamplingFactor = 17;  
 }
 
@@ -123,9 +134,16 @@ void show_value(uchar x){
   cout << n <<"\n";
 }
 
+void save_action(string out_path,vector<Mat> action){
+  for(int t=0;t<action.size();t++){
+  	string full_out_path=out_path+"frame"+std::to_string(t)+".jpg";
+    imwrite(full_out_path,action[t]);
+  }	
+}
+
 int main(int argc,char ** argv)
 {
   //vector<std::string> filenames=read_lines("/home/user/reps/vibe.txt");
   //Action action(filenames);
-  vibe("/home/user/reps/vibe.txt");
+  vibe("/home/user/reps/vibe.txt","/home/user/reps/out/");
 }

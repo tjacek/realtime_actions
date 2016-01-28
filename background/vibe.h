@@ -3,14 +3,12 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <cmath> 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
 using namespace std;
 using namespace cv;
-extern vector<std::string> read_lines(std::string name);
-
-typedef Mat BackgroundModel;
 
 class Action
 {
@@ -20,12 +18,11 @@ class Action
   	int height;
   	
 	Action(vector<std::string> str);
-	BackgroundModel create_background();
 	Mat operator[](int i);
+	Mat empty_frame();
   private:
   	vector<cv::Mat> frames;
 };
-
 
 class VibeParams{
   public:
@@ -40,3 +37,19 @@ class VibeParams{
    int getRand();
    bool decideUpdate();
 };
+
+class BackgroundModel{
+  public:
+  	BackgroundModel(int size,int width,int height);
+  	int compare(int x,int y,uchar point ,VibeParams & vibeParams);
+  	void updateNeighbor(int x,int y,uchar point ,VibeParams & vibeParams);
+  	void update(int x,int y,uchar point ,VibeParams & vibeParams);
+   
+  private:
+  	vector<Mat> samples;
+};
+
+extern vector<std::string> read_lines(std::string name);
+extern BackgroundModel * create_background(VibeParams &params,Action &action);
+extern void save_action(string out_path,vector<Mat> action);
+extern void show_value(uchar x);
