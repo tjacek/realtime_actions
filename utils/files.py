@@ -1,19 +1,20 @@
 import os
 import os.path as io 
 import pickle,re 
+from natsort import natsorted
 
 def get_files(path):
     all_in_dir=os.listdir(path)
     files= [f for f in all_in_dir  
               if is_file(f,path)]
-    files.sort()
+    files=natsorted(files)#files.sort()
     return files
 
 def get_dirs(path):
     all_in_dir=os.listdir(path)
     files= [f for f in all_in_dir  
               if is_file(f,path)]
-    files.sort()
+    files=natsorted(files)#files.sort()
     return files
 
 def conversion(in_path,out_path,conv):
