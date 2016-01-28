@@ -49,10 +49,10 @@ void vibe(string in_path){
 		bool isInBackground=  (count >= params.reqMatches);
 		if(isInBackground){
 		  if(params.decideUpdate()){
-		   // model->update(i,j,point ,params);
+		    model->update(i,j,value ,params);
 		  }
 		  if(params.decideUpdate()){
-			//model->updateNeighbor(i,j,point ,params);
+			model->updateNeighbor(i,j,value ,params);
 		  }
         }
       }
@@ -80,6 +80,29 @@ int BackgroundModel::compare(int x,int y,uchar point ,VibeParams & vibeParams){
 	return count;
 }
 
+void BackgroundModel::updateNeighbor(int x,int y,uchar point ,VibeParams & vibeParams){
+    int randn= rand() % 3;
+	int x0 = randn-1;//nearX[randn];
+    randn= rand() % 3;
+	int y0 = randn-1;//nearY[randn];
+
+	x0+= x;
+	y0+= y;
+	update(x0,y0,point ,vibeParams);
+}
+
+void BackgroundModel::update(int x,int y,uchar point ,VibeParams & vibeParams){
+  if(x<0 || y<0){
+    return;
+  }
+  if(x>samples[0].rows-1 || y>samples[0].cols-1){
+    return;
+  }
+  cout << "&"<< x << " " << y <<"\n";
+  samples[vibeParams.getRand()].at<uchar>(x,y)=point;
+}
+
+
 VibeParams::VibeParams(){
   this->nbSamples = 10;                  
   this->reqMatches = 1;                   
@@ -88,7 +111,7 @@ VibeParams::VibeParams(){
 }
 
 int VibeParams::getRand(){
-  return std::rand() % subsamplingFactor;
+  return std::rand() % nbSamples;//subsamplingFactor;
 }
 
 bool VibeParams::decideUpdate(){
