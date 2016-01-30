@@ -1,9 +1,27 @@
 #include "remove_outliers.h"
 
+pcl::PointCloud<pcl::PointXYZ> * img_to_pcl(cv::Mat img){
+  pcl::PointCloud<pcl::PointXYZ> * cloud=new pcl::PointCloud<pcl::PointXYZ>();
+  for(int i=0;i<img.rows;i++){
+    for(int j=0;j<img.cols;j++){
+      float z= (float) img.at<uchar>(i,j);
+      if(z!=0.0){
+        pcl::PointXYZ point((float)i, (float) j,z);
+        cloud->push_back (point);
+      }
+    }
+  }
+  return cloud;
+}
+
 int main(int argc,char ** argv)
 {
   
- if (argc != 2)
+  cv::Mat image = cv::imread("test.jpg",CV_LOAD_IMAGE_GRAYSCALE);
+  pcl::PointCloud<pcl::PointXYZ> * pcloud=img_to_pcl(image);
+  pcl::io::savePCDFileASCII ("test_pcd.pcd", *pcloud);
+ 
+ /*if (argc != 2)
   {
     std::cerr << "please specify command line arg '-r' or '-c'" << std::endl;
     exit(0);
@@ -62,5 +80,5 @@ int main(int argc,char ** argv)
     std::cerr << "    " << cloud_filtered->points[i].x << " "
                         << cloud_filtered->points[i].y << " "
                         << cloud_filtered->points[i].z << std::endl;
-  return (0);
+  return (0);*/
 } 
