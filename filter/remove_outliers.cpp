@@ -1,7 +1,4 @@
-#include <iostream>
-#include <pcl/point_types.h>
-#include <pcl/filters/radius_outlier_removal.h>
-#include <pcl/filters/conditional_removal.h>
+#include "remove_outliers.h"
 
 int main(int argc,char ** argv)
 {
