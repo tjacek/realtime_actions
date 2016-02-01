@@ -1,5 +1,16 @@
 #include "remove_outliers.h"
 
+void filter_img(std::string in_path,std::string out_path){
+  cv::Mat image = cv::imread(in_path,CV_LOAD_IMAGE_GRAYSCALE);
+  pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud=img_to_pcl(image);
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered=radius_filter(pcloud);
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered2=sigma_filter(cloud_filtered);  
+  pcl::PointXYZ dim=translate(cloud_filtered2);
+  cv::Mat image2=pcl_to_img(cloud_filtered2,dim);
+  cv::Mat image3=rescale(image2);
+  cv::imwrite(out_path,image3);
+}
+
 pcl::PointCloud<pcl::PointXYZ>::Ptr img_to_pcl(cv::Mat img){
   std::cout << img.rows <<" " << img.cols << "\n";
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
@@ -45,7 +56,6 @@ cv::Mat pcl_to_img(pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud,pcl::PointXYZ dim)
     uchar z=(uchar) pcloud->points[i].z;
     img.at<uchar>(x,y)=z;
     if(x<10){
-   // std::cout << pcloud->points[i].x << " " <<  pcloud->points[i].y<< " "<<pcloud->points[i].z <<"\n";
     }
   }
   return img;
@@ -75,12 +85,12 @@ cv::Mat rescale(cv::Mat img){
 
 int main(int argc,char ** argv)
 { 
-  cv::Mat image = cv::imread("test.jpg",CV_LOAD_IMAGE_GRAYSCALE);
-  pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud=img_to_pcl(image);
-  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered=radius_filter(pcloud);
-  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered2=sigma_filter(cloud_filtered);  
-  pcl::PointXYZ dim=translate(cloud_filtered2);
-  cv::Mat image2=pcl_to_img(cloud_filtered2,dim);
-  cv::Mat image3=rescale(image2);
-  cv::imwrite("result.jpg",image3);
+  if(argc <3){
+    std::cout << "Too few arguments" <<std::endl;
+    return 1;
+  }
+  std::string in_path(argv[1]);
+  std::string out_path(argv[2]);
+  std::cout << in_path << " " << out_path << std::endl;
+  filter_img(in_path,out_path);
 } 

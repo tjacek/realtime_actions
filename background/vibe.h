@@ -41,6 +41,7 @@ class VibeParams{
 class BackgroundModel{
   public:
   	BackgroundModel(int size,int width,int height);
+  	BackgroundModel(int size,Mat prototype);
   	int compare(int x,int y,uchar point ,VibeParams & vibeParams);
   	void updateNeighbor(int x,int y,uchar point ,VibeParams & vibeParams);
   	void update(int x,int y,uchar point ,VibeParams & vibeParams);

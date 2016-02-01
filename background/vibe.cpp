@@ -31,7 +31,7 @@ Action::Action(vector<std::string> names){
  }
 
 BackgroundModel * create_background(VibeParams &params,Action &action){
-  return new BackgroundModel(params.nbSamples,action.width,action.height);
+  return new BackgroundModel(params.nbSamples,action[0]);
 }
 
 Mat Action::operator[](int i){
@@ -79,6 +79,14 @@ BackgroundModel::BackgroundModel(int size,int width,int height){
   }
 }
 
+BackgroundModel::BackgroundModel(int size,Mat prototype){
+  for(int t=0;t<size;t++){
+    Mat sample_frame=prototype.clone();
+    samples.push_back(sample_frame);
+  }
+}
+
+
 int BackgroundModel::compare(int x,int y,uchar point ,VibeParams & vibeParams){
 	int count = 0,index=0;
 	while ((count < vibeParams.reqMatches) && (index < vibeParams.nbSamples)){
@@ -117,8 +125,8 @@ void BackgroundModel::update(int x,int y,uchar point ,VibeParams & vibeParams){
 VibeParams::VibeParams(){
   this->nbSamples = 10;                  
   this->reqMatches = 1;                   
-  this->radius = 20;                     
-  this->subsamplingFactor = 17;  
+  this->radius = 30;                     
+  this->subsamplingFactor = 5;  
 }
 
 int VibeParams::getRand(){
@@ -126,7 +134,8 @@ int VibeParams::getRand(){
 }
 
 bool VibeParams::decideUpdate(){
-  return getRand()==0;
+  int n=std::rand() % subsamplingFactor;
+  return n==0;
 }
 
 void show_value(uchar x){
@@ -143,7 +152,12 @@ void save_action(string out_path,vector<Mat> action){
 
 int main(int argc,char ** argv)
 {
-  //vector<std::string> filenames=read_lines("/home/user/reps/vibe.txt");
-  //Action action(filenames);
-  vibe("/home/user/reps/vibe.txt","/home/user/reps/out/");
+  if(argc < 3){
+    std::cout << "Too few arguments " << std::endl;
+    return 1;
+  }
+
+  string in_path(argv[1]);
+  string out_path(argv[2]);
+  vibe(in_path,out_path);
 }
