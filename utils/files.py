@@ -2,6 +2,7 @@ import os
 import os.path as io 
 import pickle,re 
 from natsort import natsorted
+from shutil import copyfile
 
 def get_files(path):
     all_in_dir=os.listdir(path)
@@ -13,13 +14,18 @@ def get_files(path):
 def get_dirs(path):
     all_in_dir=os.listdir(path)
     files= [f for f in all_in_dir  
-              if is_file(f,path)]
+              if not is_file(f,path)]
     files=natsorted(files)#files.sort()
     return files
 
-def conversion(in_path,out_path,conv):
+def conversion(in_path,out_path,conv,dir=True):
     make_dir(out_path)
-    paths=get_files(in_path)
+    if(dir):
+        paths=get_files(in_path)
+    else:
+        paths=get_dirs(in_path)
+    print(in_path)
+    print(paths)
     in_paths=append_path(in_path,paths)
     out_paths=append_path(out_path,paths)
     for in_i,out_i in zip(in_paths,out_paths):
@@ -27,11 +33,27 @@ def conversion(in_path,out_path,conv):
         conv(in_i,out_i)
 
 def dir_to_txt(in_path,out_path):
-    dir_content=get_dirs(in_path)
+    dir_content=get_files(in_path)
     dir_content=append_path(in_path,dir_content)
     text="\n".join(dir_content)
     save_string(out_path,text)
-    print(text)
+
+def unify_dir(in_path,out_path):
+    make_dir(out_path)
+    paths=get_dirs(in_path)
+    in_paths=append_path(in_path,paths)
+    i=0
+    for in_i in in_paths:
+        img_names=get_files(in_i)
+        for img_i in img_names:
+            src=in_i+"/"+img_i
+            dst=out_path+"/"+img_i
+            dst=dst.replace(".jpg","_"+str(i)+".jpg")
+            print(src)
+            print(dst)
+            i+=1
+            copyfile(src, dst)
+
 
 def read_file(path):
     file_object = open(path,'r')
