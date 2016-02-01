@@ -51,7 +51,7 @@ cv::Mat pcl_to_img(pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud,pcl::PointXYZ dim)
   return img;
 }
 
-pcl::PointXYZ rescale(pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud){
+pcl::PointXYZ translate(pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud){
   pcl::PointXYZ min_pt;
   pcl::PointXYZ max_pt;
   pcl::PointXYZ dim;
@@ -67,14 +67,20 @@ pcl::PointXYZ rescale(pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud){
   return dim;
 }
 
+cv::Mat rescale(cv::Mat img){
+  cv::Mat dst=cv::Mat::zeros(90,40,CV_8UC1);
+  cv::resize(img,dst, dst.size(), 0, 0);//,cv::INTER_LINEAR );
+  return dst;
+}
+
 int main(int argc,char ** argv)
 { 
   cv::Mat image = cv::imread("test.jpg",CV_LOAD_IMAGE_GRAYSCALE);
   pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud=img_to_pcl(image);
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered=radius_filter(pcloud);
-  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered2=sigma_filter(cloud_filtered);
-  
-  pcl::PointXYZ dim=rescale(cloud_filtered2);
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered2=sigma_filter(cloud_filtered);  
+  pcl::PointXYZ dim=translate(cloud_filtered2);
   cv::Mat image2=pcl_to_img(cloud_filtered2,dim);
-  cv::imwrite("result.jpg",image2);
+  cv::Mat image3=rescale(image2);
+  cv::imwrite("result.jpg",image3);
 } 
