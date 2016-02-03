@@ -4,8 +4,9 @@
 #include <iostream>
 #include <vector>
 #include <cmath> 
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/opencv.hpp>
+#include <opencv2/highgui/highgui_c.h>
 
 using namespace std;
 using namespace cv;
@@ -20,6 +21,8 @@ class Action
 	Action(vector<std::string> str);
 	Mat operator[](int i);
 	Mat empty_frame();
+  uchar get_rvalue(int i,int j);
+
   private:
   	vector<cv::Mat> frames;
 };
@@ -42,6 +45,7 @@ class BackgroundModel{
   public:
   	BackgroundModel(int size,int width,int height);
   	BackgroundModel(int size,Mat prototype);
+    BackgroundModel(int size,Action& action);
   	int compare(int x,int y,uchar point ,VibeParams & vibeParams);
   	void updateNeighbor(int x,int y,uchar point ,VibeParams & vibeParams);
   	void update(int x,int y,uchar point ,VibeParams & vibeParams);

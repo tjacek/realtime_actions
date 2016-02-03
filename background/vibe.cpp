@@ -7,7 +7,7 @@ vector<std::string> read_lines(string name){
   vector<std::string> str_vector;	
   while (std::getline(infile, line))
   {
-  	str_vector.push_back(line);
+    str_vector.push_back(line);
   }
   return str_vector;
  }
@@ -18,6 +18,7 @@ Action::Action(vector<std::string> names){
     std::string filename=*it;
     Mat image;
     image = imread(filename,CV_LOAD_IMAGE_GRAYSCALE);
+    cv::GaussianBlur( image, image, Size( 7, 7 ), 0, 0 );
     frames.push_back(image);
     cout << filename << "\n";
   }
@@ -30,12 +31,14 @@ Action::Action(vector<std::string> names){
    return Mat::zeros(width,height,CV_8UC1);
  }
 
-BackgroundModel * create_background(VibeParams &params,Action &action){
-  return new BackgroundModel(params.nbSamples,action[0]);
+uchar Action::get_rvalue(int i,int j){
+  int t=std::rand() % frames.size();
+  uchar value=frames[t].at<uchar>(i,j);
+  return value;   
 }
 
-Mat Action::operator[](int i){
-  return frames[i];
+BackgroundModel * create_background(VibeParams &params,Action &action){
+  return new BackgroundModel(params.nbSamples,action);
 }
 
 void vibe(string in_path,string out_path){
@@ -62,7 +65,7 @@ void vibe(string in_path,string out_path){
 		  }
 
         }else{
-          show_value(value);
+          //show_value(value);
           new_frame.at<uchar>(i,j)=value;	
         }
       }
@@ -86,6 +89,21 @@ BackgroundModel::BackgroundModel(int size,Mat prototype){
   }
 }
 
+BackgroundModel::BackgroundModel(int size,Action& action){
+  for(int t=0;t<size;t++){
+    Mat sample_frame=Mat::zeros(action.width,action.height,CV_8UC1);
+    for(int i=0;i<action.width;i++){
+      for(int j=0;j<action.height;j++){
+        sample_frame.at<uchar>(i,j)=action.get_rvalue(i,j);
+      }
+    }
+    samples.push_back(sample_frame);
+  } 
+}
+
+Mat Action::operator[](int i){
+  return frames[i];
+}
 
 int BackgroundModel::compare(int x,int y,uchar point ,VibeParams & vibeParams){
 	int count = 0,index=0;
@@ -118,13 +136,12 @@ void BackgroundModel::update(int x,int y,uchar point ,VibeParams & vibeParams){
   if(x>samples[0].rows-1 || y>samples[0].cols-1){
     return;
   }
-  cout << "&"<< x << " " << y <<"\n";
   samples[vibeParams.getRand()].at<uchar>(x,y)=point;
 }
 
 VibeParams::VibeParams(){
   this->nbSamples = 10;                  
-  this->reqMatches = 1;                   
+  this->reqMatches = 3;                   
   this->radius = 30;                     
   this->subsamplingFactor = 5;  
 }
