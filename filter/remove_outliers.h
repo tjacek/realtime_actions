@@ -19,10 +19,12 @@
 extern void filter_img(std::string in_path,std::string out_path);
 extern pcl::PointCloud<pcl::PointXYZ>::Ptr img_to_pcl(cv::Mat depth_img);
 extern cv::Mat pcl_to_img(pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud,pcl::PointXYZ dim);
+extern cv::Mat pcl_to_img(pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud);
 extern pcl::PointCloud<pcl::PointXYZ>::Ptr radius_filter(pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud);
 extern pcl::PointCloud<pcl::PointXYZ>::Ptr sigma_filter(pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud);
 extern pcl::PointXYZ translate(pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud);
 extern pcl::PointCloud<pcl::PointXYZ>::Ptr growth_segmentation( pcl::PointCloud<pcl::PointXYZ>::Ptr cloud );
 extern int max_component(std::vector <pcl::PointIndices> clusters);
 extern pcl::PointCloud<pcl::PointXYZ>::Ptr extract_cloud(pcl::PointIndices,pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
+extern pcl::PointCloud<pcl::PointXYZ>::Ptr large_clusters(std::vector<pcl::PointIndices> clusters,pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
 extern cv::Mat rescale(cv::Mat image);
