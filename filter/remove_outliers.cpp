@@ -8,8 +8,8 @@ void filter_img(std::string in_path,std::string out_path){
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered3= euclidean_clusters( cloud_filtered2 ); 
   pcl::PointXYZ dim=translate(cloud_filtered3);
   cv::Mat image2=pcl_to_img(cloud_filtered3,dim);
-  //cv::Mat image3=rescale(image2);
-  cv::imwrite(out_path,image2);
+  cv::Mat image3=rescale(image2);
+  cv::imwrite(out_path,image3);
 }
 
 pcl::PointCloud<pcl::PointXYZ>::Ptr img_to_pcl(cv::Mat img){
@@ -85,6 +85,7 @@ pcl::PointXYZ translate(pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud){
 }
 
 cv::Mat rescale(cv::Mat img){
+  cv::GaussianBlur( img, img, cv::Size( 5, 5 ), 0, 0 );
   cv::Mat dst=cv::Mat::zeros(90,40,CV_8UC1);
   cv::resize(img,dst, dst.size(), 0, 0);//,cv::INTER_LINEAR );
   return dst;
@@ -102,7 +103,7 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr euclidean_clusters(pcl::PointCloud<pcl::Poin
   ec.setInputCloud (cloud);
   ec.extract (clusters);
   int max_cls=max_component(clusters);
-  return extract_cloud(clusters[max_cls], cloud);//large_clusters(clusters,cloud);
+  return extract_cloud(clusters[max_cls], cloud);
 }
 
 
