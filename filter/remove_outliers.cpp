@@ -75,11 +75,12 @@ pcl::PointXYZ translate(pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud){
   pcl::getMinMax3D  (*pcloud,min_pt,max_pt );   
   dim.x=max_pt.x-min_pt.x;
   dim.y=max_pt.y-min_pt.y;
-  dim.z=0;
+  dim.z=max_pt.z-min_pt.z;
   Eigen::Matrix4f transform_1 = Eigen::Matrix4f::Identity();
-  std::cout << "Dim "<< dim.x << " " << dim.y <<"\n";
+  std::cout << "Dim "<< dim.x << " " << dim.y << " " << dim.z<<"\n";
   transform_1 (0,3) = -min_pt.x;
   transform_1 (1,3) = -min_pt.y;
+  transform_1 (2,3) = -min_pt.z+1.0;
   pcl::transformPointCloud (*pcloud, *pcloud, transform_1);
   return dim;
 }
