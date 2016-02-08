@@ -60,9 +60,10 @@ cv::Mat pcl_to_img(pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud,pcl::PointXYZ dim)
   {
     int x=(int) pcloud->points[i].x ;
     int y=(int) pcloud->points[i].y;
-    uchar z=(uchar) pcloud->points[i].z;
+    float z=(float) pcloud->points[i].z;
+    z= ( z/(dim.z+3) )*255.0;
     if(x<dim.x && y<dim.y){
-      img.at<uchar>(x,y)=z;
+      img.at<uchar>(x,y)=(uchar) z;
     }
   }
   return img;
@@ -86,7 +87,7 @@ pcl::PointXYZ translate(pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud){
 }
 
 cv::Mat rescale(cv::Mat img){
-  cv::GaussianBlur( img, img, cv::Size( 5, 5 ), 0, 0 );
+  //cv::GaussianBlur( img, img, cv::Size( 5, 5 ), 0, 0 );
   cv::Mat dst=cv::Mat::zeros(90,40,CV_8UC1);
   cv::resize(img,dst, dst.size(), 0, 0);//,cv::INTER_LINEAR );
   return dst;

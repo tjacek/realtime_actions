@@ -18,7 +18,7 @@ Action::Action(vector<std::string> names){
     std::string filename=*it;
     Mat image;
     image = imread(filename,CV_LOAD_IMAGE_GRAYSCALE);
-    cv::GaussianBlur( image, image, Size( 7, 7 ), 0, 0 );
+    //cv::GaussianBlur( image, image, Size( 7, 7 ), 0, 0 );
     frames.push_back(image);
     cout << filename << "\n";
   }
@@ -141,9 +141,9 @@ void BackgroundModel::update(int x,int y,uchar point ,VibeParams & vibeParams){
 
 VibeParams::VibeParams(){
   this->nbSamples = 10;                  
-  this->reqMatches = 3;                   
+  this->reqMatches = 5;                   
   this->radius = 30;                     
-  this->subsamplingFactor = 5;  
+  this->subsamplingFactor = 3;  
 }
 
 int VibeParams::getRand(){
