@@ -62,6 +62,7 @@ cv::Mat pcl_to_img(pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud,pcl::PointXYZ dim)
     int y=(int) pcloud->points[i].y;
     float z=(float) pcloud->points[i].z;
     z= ( z/(dim.z+3) )*255.0;
+    z= 255.0-z;
     if(x<dim.x && y<dim.y){
       img.at<uchar>(x,y)=(uchar) z;
     }
