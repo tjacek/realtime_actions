@@ -42,16 +42,15 @@ def unify_dir(in_path,out_path):
     make_dir(out_path)
     paths=get_dirs(in_path)
     in_paths=append_path(in_path,paths)
-    i=0
-    for in_i in in_paths:
+    for i,in_i in enumerate(in_paths):
         img_names=get_files(in_i)
-        for img_i in img_names:
+        for j,img_i in enumerate(img_names):
             src=in_i+"/"+img_i
             dst=out_path+"/"+img_i
-            dst=dst.replace(".jpg","_"+str(i)+".jpg")
+            postfix="_"+str(i)+"_" + str(j) +".jpg"
+            dst=dst.replace(".jpg",postfix)
             print(src)
             print(dst)
-            i+=1
             copyfile(src, dst)
 
 
