@@ -18,6 +18,10 @@ def get_dirs(path):
     files=natsorted(files)#files.sort()
     return files
 
+def get_paths(path):
+    names=get_files(path)
+    return append_path(path,names)
+
 def conversion(in_path,out_path,conv,dir=True):
     make_dir(out_path)
     if(dir):
@@ -34,9 +38,10 @@ def conversion(in_path,out_path,conv,dir=True):
 
 def dir_to_txt(in_path,out_path):
     dir_content=get_files(in_path)
-    dir_content=append_path(in_path,dir_content)
-    text="\n".join(dir_content)
+    dir_paths=append_path(in_path,dir_content)
+    text="\n".join(dir_paths)
     save_string(out_path,text)
+    return dir_content
 
 def unify_dir(in_path,out_path):
     make_dir(out_path)
@@ -52,7 +57,6 @@ def unify_dir(in_path,out_path):
             print(src)
             print(dst)
             copyfile(src, dst)
-
 
 def read_file(path):
     file_object = open(path,'r')
@@ -98,4 +102,8 @@ def replace_sufix(sufix,files):
     return map(lambda s:s.replace(sufix,""),files)
 
 def extract_prefix(filename):
-    return filename.split(".")[-1]	
+    return filename.split(".")[-1]
+
+def rename(in_paths,out_paths):
+    for in_i,out_i in zip(in_paths,out_paths):
+        os.rename(in_i,out_i)	
