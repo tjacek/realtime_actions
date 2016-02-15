@@ -106,4 +106,10 @@ def extract_prefix(filename):
 
 def rename(in_paths,out_paths):
     for in_i,out_i in zip(in_paths,out_paths):
-        os.rename(in_i,out_i)	
+        os.rename(in_i,out_i)
+
+def extract_number(path):
+    name=get_name(path)
+    pattern = re.compile(r"\d+")
+    raw_digits=re.findall(pattern,name)[0]
+    return int(raw_digits)
