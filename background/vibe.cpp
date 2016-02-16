@@ -64,10 +64,6 @@ BackgroundModel::BackgroundModel(int size,Action& action){
   } 
 }
 
-Mat Action::operator[](int i){
-  return frames[i];
-}
-
 int BackgroundModel::compare(int x,int y,uchar point ,VibeParams & vibeParams){
 	int count = 0,index=0;
 	while ((count < vibeParams.reqMatches) && (index < vibeParams.nbSamples)){

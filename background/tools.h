@@ -21,9 +21,7 @@ class Action
 	Action(vector<std::string> str);
 	Mat operator[](int i);
 	Mat empty_frame();
-  uchar get_rvalue(int i,int j);
-
-  private:
+    uchar get_rvalue(int i,int j);
   	vector<cv::Mat> frames;
 };
 
