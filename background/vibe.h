@@ -1,3 +1,4 @@
+#include "tools.h"
 #include <sstream>
 #include <fstream>
 #include <string>
@@ -8,24 +9,9 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui/highgui_c.h>
 
+
 using namespace std;
 using namespace cv;
-
-class Action
-{
-  public:
-  	int length;
-  	int width;
-  	int height;
-  	
-	Action(vector<std::string> str);
-	Mat operator[](int i);
-	Mat empty_frame();
-  uchar get_rvalue(int i,int j);
-
-  private:
-  	vector<cv::Mat> frames;
-};
 
 class VibeParams{
   public:
@@ -54,7 +40,4 @@ class BackgroundModel{
   	vector<Mat> samples;
 };
 
-extern vector<std::string> read_lines(std::string name);
 extern BackgroundModel * create_background(VibeParams &params,Action &action);
-extern void save_action(string out_path,vector<Mat> action);
-extern void show_value(uchar x);
