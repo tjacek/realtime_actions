@@ -1,14 +1,7 @@
 #include "tools.h"
-#include <sstream>
-#include <fstream>
-#include <string>
-#include <iostream>
-#include <vector>
-#include <cmath> 
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui/highgui_c.h>
-
 
 using namespace std;
 using namespace cv;

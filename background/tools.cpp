@@ -37,6 +37,10 @@ uchar Action::get_rvalue(int i,int j){
   return value;   
 }
 
+Mat Action::operator[](int i){
+  return frames[i];
+}
+
 void show_value(uchar x){
   int n=(int) x;
   cout << n <<"\n";
