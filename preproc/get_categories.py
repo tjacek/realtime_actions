@@ -1,9 +1,10 @@
 import utils.files as files
+from shutil import copyfile
 import re
 
 class Action(object):
     def __init__(self,name):
-    	self.name=name
+    	self.name=name.replace("\n","")
         self.data={}
 
     def __getitem__(self,index):
@@ -13,18 +14,61 @@ class Action(object):
         self.data[index]=value
 
     def __str__(self):
-        return self.name     	
+        return self.name
 
-def extract(path):
-    txt=files.read_file(path)
+    def get_path(self,in_path):
+        return in_path+"/"+self.name
+
+    def get_frame_names(self,in_path):
+        full_path=self.get_path(in_path)
+        names_only=files.get_files(full_path)
+        frame_names=[ self.name+"/"+name_i for name_i in names_only]
+        #print(frame_names)
+        return files.append_path(in_path,frame_names) 
+
+    def categorize(self,frame_names):
+        cats=[self.get_category(name_i) for name_i in frame_names]
+        return zip(frame_names,cats)
+
+    def get_category(self,frame_name):
+        id=files.extract_number(frame_name)
+        for cat_i in self.data.keys():
+            a,b=self.data[cat_i]
+            if( a<=id and id<=b):
+                return cat_i
+        return None
+
+def extract(action_path,out_path,cat_path):
+    txt=files.read_file(cat_path)
     txt=files.array_to_txt(txt)
     print(txt)
     pattern = re.compile(r"s\d+_e\d+\n")
     action_names=re.findall(pattern, txt)
     actions=pattern.split(txt)
-    cats=[parse_action(name_i,action_i) for name_i,action_i in zip(action_names,actions)
+    actions=[parse_action(name_i,action_i) 
+             for name_i,action_i in zip(action_names,actions)
                                 if action_i!='']
-    print(cats[0])
+    
+    [seg_action(action_path,out_path,act_i) for act_i in actions]
+
+def seg_action(action_path,out_path,action):
+    files.make_dir(out_path)
+    frame_names=action.get_frame_names(action_path)
+    print(frame_names)
+    cats=action.categorize(frame_names)
+    print(cats)
+    cats=[ (frame_path,cat_i) for frame_path,cat_i in cats
+                                if cat_i!=None]
+    for frame_path,cat_i in cats:
+        print(frame_path)
+        cat_path=out_path+"/"+cat_i
+        files.make_dir(cat_path)
+        instance_path=cat_path+"/"+action.name
+        files.make_dir(instance_path)
+        full_path=files.replace_path(frame_path,instance_path)
+        print(full_path)
+        copyfile(frame_path, full_path)
+    return len(cats)
 
 def parse_action(name,raw_action):
     cats=Action(name)
@@ -43,4 +87,3 @@ def parse_line(line):
         b=int(raw[2])
         return name,(a,b)
     return None
-

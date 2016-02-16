@@ -91,8 +91,7 @@ def read_object(path):
     file_object = open(path,'r')
     obj=pickle.load(file_object)  
     file_object.close()
-    return obj
-
+    return objh
 def append_path(path,files):
     paths=[path+"/"+f for f in files]
     paths=[path.replace("//","/") for path in paths]
@@ -113,3 +112,7 @@ def extract_number(path):
     pattern = re.compile(r"\d+")
     raw_digits=re.findall(pattern,name)[0]
     return int(raw_digits)
+
+def replace_path(old_path, new_path):
+    name=get_name(old_path)
+    return new_path+"/"+name
