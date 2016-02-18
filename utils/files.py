@@ -22,6 +22,11 @@ def get_paths(path):
     names=get_files(path)
     return append_path(path,names)
 
+def dir_conversion(in_path,out_path,conv):
+    def files_conversion(in_path,out_path):
+        conversion(in_path,out_path,conv)
+    conversion(in_path,out_path,files_conversion,False)
+
 def conversion(in_path,out_path,conv,dir=True):
     make_dir(out_path)
     if(dir):
