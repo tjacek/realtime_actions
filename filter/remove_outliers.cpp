@@ -12,21 +12,6 @@ void filter_img(std::string in_path,std::string out_path){
   cv::imwrite(out_path,image3);
 }
 
-pcl::PointCloud<pcl::PointXYZ>::Ptr img_to_pcl(cv::Mat img){
-  std::cout << img.rows <<" " << img.cols << "\n";
-  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
-  for(int i=0;i<img.rows;i++){
-    for(int j=0;j<img.cols;j++){
-      float z= (float) img.at<uchar>(i,j);
-      if(z>10.0){
-        pcl::PointXYZ point((float)i, (float) j,z);
-        cloud->push_back (point);
-      }
-    }
-  }
-  return cloud;
-}
-
 pcl::PointCloud<pcl::PointXYZ>::Ptr radius_filter(pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud){
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered (new pcl::PointCloud<pcl::PointXYZ>);
   pcl::RadiusOutlierRemoval<pcl::PointXYZ> outrem;
@@ -48,28 +33,6 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr sigma_filter(pcl::PointCloud<pcl::PointXYZ>:
   return cloud_filtered;
 }
 
-cv::Mat pcl_to_img(pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud){
-  pcl::PointXYZ dim(350,350,255);
-  return pcl_to_img(pcloud,dim);
-}
-
-cv::Mat pcl_to_img(pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud,pcl::PointXYZ dim){
-  std::cout << dim.x;
-  cv::Mat img=cv::Mat::zeros(dim.x,dim.y,CV_8UC1);
-  for (size_t i = 0; i < pcloud->points.size (); ++i)
-  {
-    int x=(int) pcloud->points[i].x ;
-    int y=(int) pcloud->points[i].y;
-    float z=(float) pcloud->points[i].z;
-    z= ( z/(dim.z+3) )*255.0;
-    z= 255.0-z;
-    if(x<dim.x && y<dim.y){
-      img.at<uchar>(x,y)=(uchar) z;
-    }
-  }
-  return img;
-}
-
 pcl::PointXYZ translate(pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud){
   pcl::PointXYZ min_pt;
   pcl::PointXYZ max_pt;
@@ -89,6 +52,12 @@ pcl::PointXYZ translate(pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud){
 
 cv::Mat rescale(cv::Mat img){
   //cv::GaussianBlur( img, img, cv::Size( 5, 5 ), 0, 0 );
+  //std::cout << "Transpose "<< img.cols-img.rows  <<"\n";
+  bool rescale=false;
+  if(rescale && (img.rows-img.cols)<20 ){//img.cols>img.rows){
+    std::cout << "Transpose "<< img.rows-img.cols  <<"\n";
+    cv::transpose(img,img);
+  }
   cv::Mat dst=cv::Mat::zeros(90,40,CV_8UC1);
   cv::resize(img,dst, dst.size(), 0, 0);//,cv::INTER_LINEAR );
   return dst;
@@ -188,7 +157,7 @@ int max_component(std::vector <pcl::PointIndices> clusters){
 int main(int argc,char ** argv)
 { 
   if(argc <3){
-     filter_img("/home/user/reps/realtime_actions/filter/depth.jpg",
+     filter_img("/home/user/reps/realtime_actions/filter/vr.jpg",
                 "/home/user/reps/realtime_actions/filter/out.jpg");
     //std::cout << "Too few arguments" <<std::endl;
     return 1;
