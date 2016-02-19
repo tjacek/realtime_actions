@@ -5,13 +5,52 @@ void filter_img(std::string in_path,std::string out_path){
   pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud=img_to_pcl(image);
   int iter=1;
   //for(int i=0;i<iter;i++){
- // Eigen::Vector3f z_axsis =Eigen::Vector3f(0.0,0.0,1.0);  
- // pcloud=find_planes(pcloud,z_axsis,5.0,5.0);
+  Eigen::Vector3f z_axsis =Eigen::Vector3f(0.0,0.0,1.0);  
+  pcloud=find_planes(pcloud,z_axsis,5.0,5.0);
+  pcloud=find_background(pcloud);
  // Eigen::Vector3f y_axsis =Eigen::Vector3f(1.0,0.0,0.0);  
  // pcloud=find_planes(pcloud,y_axsis,10.0,1.0);
   pcl::PointXYZ dim(image.rows,image.cols,255);
- // cv::Mat image2=pcl_to_img(pcloud,dim);
- // cv::imwrite(out_path,image2);
+  cv::Mat image2=pcl_to_img(pcloud,dim);
+  cv::imwrite(out_path,image2);
+}
+
+
+pcl::PointCloud<pcl::PointXYZ>::Ptr find_background(pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud){
+   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered (new pcl::PointCloud<pcl::PointXYZ>);
+  pcl::PointIndicesPtr ground (new pcl::PointIndices);
+
+  pcl::ProgressiveMorphologicalFilter<pcl::PointXYZ> pmf;
+  pmf.setInputCloud (pcloud);
+  pmf.setMaxWindowSize (20);
+  pmf.setSlope (1.0f);
+  pmf.setInitialDistance (0.5f);
+  pmf.setMaxDistance (3.0f);
+  pmf.extract (ground->indices);
+
+  pcl::ExtractIndices<pcl::PointXYZ> extract;
+  extract.setInputCloud (pcloud);
+  extract.setIndices (ground);
+  extract.filter (*cloud_filtered);
+
+  return cloud_filtered;
+  /*pcl::PointIndicesPtr ground (new pcl::PointIndices);
+  pcl::ProgressiveMorphologicalFilter<pcl::PointXYZ> pmf;
+  pmf.setInputCloud (pcloud);
+  pmf.setMaxWindowSize (20);
+  pmf.setSlope (1.0f);
+  pmf.setInitialDistance (0.5f);
+  pmf.setMaxDistance (3.0f);
+  pmf.extract (ground->indices);
+  pcl::PointIndices::Ptr inliers (new pcl::PointIndices);
+
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered;
+  pcl::ExtractIndices<pcl::PointXYZ> extract;
+  extract.setInputCloud (pcloud);
+  extract.setIndices (ground);
+  extract.filter (*cloud_filtered);
+  return extract_cloud(inliers,cloud_filtered);*/
+
 }
 
 pcl::PointCloud<pcl::PointXYZ>::Ptr find_planes(pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud,Eigen::Vector3f axsis,
