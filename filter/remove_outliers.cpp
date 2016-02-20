@@ -5,11 +5,12 @@ void filter_img(std::string in_path,std::string out_path){
   pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud=img_to_pcl(image);
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered=radius_filter(pcloud);
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered2=sigma_filter(cloud_filtered); 
-  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered3= euclidean_clusters( cloud_filtered2 ); 
+  //pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered3= euclidean_clusters( cloud_filtered2 ); 
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered3=growth_segmentation( cloud_filtered2);
   pcl::PointXYZ dim=translate(cloud_filtered3);
   cv::Mat image2=pcl_to_img(cloud_filtered3,dim);
-  cv::Mat image3=rescale(image2);
-  cv::imwrite(out_path,image3);
+  //cv::Mat image3=rescale(image2);
+  cv::imwrite(out_path,image2);
 }
 
 pcl::PointCloud<pcl::PointXYZ>::Ptr radius_filter(pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud){
@@ -104,13 +105,14 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr growth_segmentation( pcl::PointCloud<pcl::Po
   reg.setInputCloud (cloud);
   //reg.setIndices (indices);
   reg.setInputNormals (normals);
-  reg.setSmoothnessThreshold (3.0 / 180.0 * M_PI);
-  reg.setCurvatureThreshold (1.0);
+  reg.setSmoothnessThreshold (30.0 / 180.0 * M_PI);
+  reg.setCurvatureThreshold (20.0);
 
   std::vector <pcl::PointIndices> clusters;
   reg.extract (clusters);
+  int max_cls=max_component(clusters);
 
-  return large_clusters(clusters,cloud);//extract_cloud(clusters[max_cmp], cloud);
+  return extract_cloud(clusters[max_cls],cloud);//extract_cloud(clusters[max_cmp], cloud);
 }
 
 pcl::PointCloud<pcl::PointXYZ>::Ptr large_clusters(std::vector<pcl::PointIndices> clusters,pcl::PointCloud<pcl::PointXYZ>::Ptr cloud){
@@ -157,7 +159,7 @@ int max_component(std::vector <pcl::PointIndices> clusters){
 int main(int argc,char ** argv)
 { 
   if(argc <3){
-     filter_img("/home/user/reps/realtime_actions/filter/vr.jpg",
+     filter_img("/home/user/reps/realtime_actions/filter/depth.jpg",
                 "/home/user/reps/realtime_actions/filter/out.jpg");
     //std::cout << "Too few arguments" <<std::endl;
     return 1;
