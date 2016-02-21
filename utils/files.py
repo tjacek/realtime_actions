@@ -1,6 +1,8 @@
+import utils.text as text
 import os
 import os.path as io 
 import pickle,re 
+import shutil
 from natsort import natsorted
 from shutil import copyfile
 
@@ -63,6 +65,14 @@ def unify_dir(in_path,out_path):
             print(dst)
             copyfile(src, dst)
 
+def extract_dir(in_path,out_path,sufix="pcd"):
+    make_dir(out_path)
+    filenames=get_files(in_path)
+    filenames=[filename_i for filename_i in filenames
+                        if text.has_sufix(filename_i,sufix)]
+    for filename_i in filenames:
+        shutil.move(in_path+"/"+filename_i,out_path+"/"+filename_i)
+
 def read_file(path):
     file_object = open(path,'r')
     lines=file_object.readlines()  
@@ -97,26 +107,15 @@ def read_object(path):
     obj=pickle.load(file_object)  
     file_object.close()
     return objh
+
 def append_path(path,files):
     paths=[path+"/"+f for f in files]
     paths=[path.replace("//","/") for path in paths]
     return paths
 
-def replace_sufix(sufix,files):
-    return map(lambda s:s.replace(sufix,""),files)
-
-def extract_prefix(filename):
-    return filename.split(".")[-1]
-
 def rename(in_paths,out_paths):
     for in_i,out_i in zip(in_paths,out_paths):
         os.rename(in_i,out_i)
-
-def extract_number(path):
-    name=get_name(path)
-    pattern = re.compile(r"\d+")
-    raw_digits=re.findall(pattern,name)[0]
-    return int(raw_digits)
 
 def replace_path(old_path, new_path):
     name=get_name(old_path)
