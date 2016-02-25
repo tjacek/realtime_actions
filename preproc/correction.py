@@ -13,7 +13,7 @@ def read_action(path):
 
 def save_action(action,frame_names):
     for i,path_i in enumerate(frame_names):
-        cv2.imwrite(action[i],path)
+        cv2.imwrite(path_i,action[i])
 
 def correction(action):
     width=action[0].shape[0]

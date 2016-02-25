@@ -1,4 +1,5 @@
 import utils.files as files
+import utils.text as text
 from shutil import copyfile
 import re
 
@@ -21,17 +22,17 @@ class Action(object):
 
     def get_frame_names(self,in_path):
         full_path=self.get_path(in_path)
-        names_only=files.get_files(full_path)
-        frame_names=[ self.name+"/"+name_i for name_i in names_only]
+        #names_only=files.get_files(full_path,F)
+        #frame_names=[ name_i for name_i in names_only]
         #print(frame_names)
-        return files.append_path(in_path,frame_names) 
+        return files.get_files(full_path,True)#files.append_path(in_path,frame_names) 
 
     def categorize(self,frame_names):
         cats=[self.get_category(name_i) for name_i in frame_names]
         return zip(frame_names,cats)
 
     def get_category(self,frame_name):
-        id=files.extract_number(frame_name)
+        id=text.extract_number(frame_name)
         for cat_i in self.data.keys():
             a,b=self.data[cat_i]
             if( a<=id and id<=b):
@@ -56,6 +57,7 @@ def seg_action(action_path,out_path,action):
     frame_names=action.get_frame_names(action_path)
     print(frame_names)
     cats=action.categorize(frame_names)
+    print("Cats")
     print(cats)
     cats=[ (frame_path,cat_i) for frame_path,cat_i in cats
                                 if cat_i!=None]
@@ -66,7 +68,7 @@ def seg_action(action_path,out_path,action):
         instance_path=cat_path+"/"+action.name
         files.make_dir(instance_path)
         full_path=files.replace_path(frame_path,instance_path)
-        print(full_path)
+        print(frame_path)
         copyfile(frame_path, full_path)
     return len(cats)
 
