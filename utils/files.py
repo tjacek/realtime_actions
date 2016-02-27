@@ -6,18 +6,22 @@ import shutil
 from natsort import natsorted
 from shutil import copyfile
 
-def get_files(path):
+def get_files(path,append=False):
     all_in_dir=os.listdir(path)
     files= [f for f in all_in_dir  
               if is_file(f,path)]
-    files=natsorted(files)#files.sort()
+    files=natsorted(files)
+    if(append_path):
+        files=append_path(path,files)
     return files
 
-def get_dirs(path):
+def get_dirs(path,append=False):
     all_in_dir=os.listdir(path)
     files= [f for f in all_in_dir  
               if not is_file(f,path)]
     files=natsorted(files)#files.sort()
+    if(append_path):
+        files=append_path(path,files)
     return files
 
 def get_paths(path):
@@ -32,15 +36,14 @@ def dir_conversion(in_path,out_path,conv):
 def conversion(in_path,out_path,conv,dir=True):
     make_dir(out_path)
     if(dir):
-        paths=get_files(in_path)
+        in_paths=get_files(in_path,True)
     else:
-        paths=get_dirs(in_path)
-    print(in_path)
-    print(paths)
-    in_paths=append_path(in_path,paths)
-    out_paths=append_path(out_path,paths)
+        in_paths=get_dirs(in_path,True)
+    
+    out_paths=[ replace_path(in_path_i,out_path) for in_path_i in in_paths]
     for in_i,out_i in zip(in_paths,out_paths):
         print(in_i)
+        print(out_i)
         conv(in_i,out_i)
 
 def dir_to_txt(in_path,out_path):
@@ -56,9 +59,11 @@ def unify_dir(in_path,out_path):
     in_paths=append_path(in_path,paths)
     for i,in_i in enumerate(in_paths):
         img_names=get_files(in_i)
+        #print(img_names)
         for j,img_i in enumerate(img_names):
-            src=in_i+"/"+img_i
-            dst=out_path+"/"+img_i
+            src=img_i#in_i+"/"+img_i
+            print(src)
+            dst=out_path+"/"+get_name(img_i)
             postfix="_"+str(i)+"_" + str(j) +".jpg"
             dst=dst.replace(".jpg",postfix)
             print(src)
