@@ -70,6 +70,18 @@ def unify_dir(in_path,out_path):
             print(dst)
             copyfile(src, dst)
 
+def flatten_dir(in_path,out_path):
+    make_dir(out_path)
+    all_dirs=get_dirs(in_path,True)
+    old_files=get_files(in_path,True)
+    new_files=[replace_path(file_i,out_path) for file_i in old_files]
+    for in_i,out_i in zip(old_files,new_files):
+        print(in_i)
+        print(out_i)
+        shutil.move(in_i,out_i)
+    for dir_i in all_dirs:
+        flatten_dir(dir_i,out_path)
+
 def extract_dir(in_path,out_path,sufix="pcd"):
     make_dir(out_path)
     filenames=get_files(in_path)
