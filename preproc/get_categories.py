@@ -22,14 +22,15 @@ class Action(object):
 
     def get_frame_names(self,in_path):
         full_path=self.get_path(in_path)
-        #names_only=files.get_files(full_path,F)
-        #frame_names=[ name_i for name_i in names_only]
-        #print(frame_names)
         return files.get_files(full_path,True)#files.append_path(in_path,frame_names) 
 
-    def categorize(self,frame_names):
+    def categorize(self,action_path):
+        frame_names=self.get_frame_names(action_path)
         cats=[self.get_category(name_i) for name_i in frame_names]
-        return zip(frame_names,cats)
+        cat_frames=zip(frame_names,cats)
+        cat_frames=[ (frame_path,cat_i) for frame_path,cat_i in cat_frames
+                                if cat_i!=None]
+        return cat_frames
 
     def get_category(self,frame_name):
         id=text.extract_number(frame_name)
@@ -40,36 +41,36 @@ class Action(object):
         return None
 
 def extract(action_path,out_path,cat_path):
-    txt=files.read_file(cat_path)
-    txt=files.array_to_txt(txt)
-    print(txt)
-    pattern = re.compile(r"s\d+_e\d+\n")
-    action_names=re.findall(pattern, txt)
-    actions=pattern.split(txt)
+    actions,action_names=parse_info(cat_path)
     actions=[parse_action(name_i,action_i) 
              for name_i,action_i in zip(action_names,actions)
                                 if action_i!='']
-    
+    #print(actions)
     [seg_action(action_path,out_path,act_i) for act_i in actions]
 
+def parse_info(cat_path):
+    txt=files.read_file(cat_path)
+    txt=files.array_to_txt(txt)
+    #print(txt)
+    pattern = re.compile(r"s\d+_e\d+\n")
+    action_names=re.findall(pattern, txt)
+    actions=pattern.split(txt)
+    return actions,action_names
+
 def seg_action(action_path,out_path,action):
+    print("$$$$$$$$$$$$$$$$$$$$$$$$$$")
+    print(action)
     files.make_dir(out_path)
-    frame_names=action.get_frame_names(action_path)
-    print(frame_names)
-    cats=action.categorize(frame_names)
-    print("Cats")
-    print(cats)
-    cats=[ (frame_path,cat_i) for frame_path,cat_i in cats
-                                if cat_i!=None]
+    cats=action.categorize(action_path)
     for frame_path,cat_i in cats:
-        print(frame_path)
-        cat_path=out_path+"/"+cat_i
-        files.make_dir(cat_path)
-        instance_path=cat_path+"/"+action.name
-        files.make_dir(instance_path)
-        full_path=files.replace_path(frame_path,instance_path)
-        print(frame_path)
-        copyfile(frame_path, full_path)
+         print(frame_path)
+         cat_path=out_path+"/"+cat_i
+         files.make_dir(cat_path)
+         instance_path=cat_path+"/"+action.name
+         files.make_dir(instance_path)
+         dst_path=files.replace_path(frame_path,instance_path)
+         print(dst_path)    
+         copyfile(frame_path, dst_path)
     return len(cats)
 
 def parse_action(name,raw_action):
