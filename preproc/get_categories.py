@@ -17,13 +17,6 @@ class Action(object):
     def __str__(self):
         return self.name
 
-    def get_path(self,in_path):
-        return in_path+"/"+self.name
-
-    def get_frame_names(self,in_path):
-        full_path=self.get_path(in_path)
-        return files.get_files(full_path,True)#files.append_path(in_path,frame_names) 
-
     def categorize(self,action_path):
         frame_names=self.get_frame_names(action_path)
         cats=[self.get_category(name_i) for name_i in frame_names]
@@ -40,22 +33,32 @@ class Action(object):
                 return cat_i
         return None
 
+    def get_path(self,in_path):
+        return in_path+"/"+self.name
+
+    def get_frame_names(self,in_path):
+        full_path=self.get_path(in_path)
+        return files.get_files(full_path,True)
+
 def extract(action_path,out_path,cat_path):
-    actions,action_names=parse_info(cat_path)
+    actions_info=parse_info(cat_path)
     actions=[parse_action(name_i,action_i) 
-             for name_i,action_i in zip(action_names,actions)
+             for name_i,action_i in actions_info
                                 if action_i!='']
-    #print(actions)
     [seg_action(action_path,out_path,act_i) for act_i in actions]
 
 def parse_info(cat_path):
     txt=files.read_file(cat_path)
+    #print(txt)
     txt=files.array_to_txt(txt)
     #print(txt)
     pattern = re.compile(r"s\d+_e\d+\n")
     action_names=re.findall(pattern, txt)
+    #print(action_names)
     actions=pattern.split(txt)
-    return actions,action_names
+    #print(actions)
+    actions.pop()
+    return zip(action_names,actions)
 
 def seg_action(action_path,out_path,action):
     print("$$$$$$$$$$$$$$$$$$$$$$$$$$")
@@ -74,16 +77,19 @@ def seg_action(action_path,out_path,action):
     return len(cats)
 
 def parse_action(name,raw_action):
-    cats=Action(name)
+    print(name)
+    print(raw_action)
+    action=Action(name)
     raw_cats=[parse_line(line) for line in raw_action.split("\n")]
     for ln in raw_cats:
         if(ln!=None):
-            cats[ln[0]]=ln[1]
-    return cats
+            action[ln[0]]=ln[1]
+    return action
 
 def parse_line(line):
+    #print(line)
     raw=line.split(" ")
-    print(raw)
+    #print(raw)
     if(len(raw)==3):
         name=raw[0].replace(":","")
         a=int(raw[1])
