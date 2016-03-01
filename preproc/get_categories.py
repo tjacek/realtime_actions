@@ -45,24 +45,21 @@ def extract(action_path,out_path,cat_path):
     actions=[parse_action(name_i,action_i) 
              for name_i,action_i in actions_info
                                 if action_i!='']
+    print(actions_info)
     [seg_action(action_path,out_path,act_i) for act_i in actions]
 
 def parse_info(cat_path):
     txt=files.read_file(cat_path)
-    #print(txt)
     txt=files.array_to_txt(txt)
-    #print(txt)
     pattern = re.compile(r"s\d+_e\d+\n")
     action_names=re.findall(pattern, txt)
-    #print(action_names)
     actions=pattern.split(txt)
-    #print(actions)
-    actions.pop()
+    del actions[0]
     return zip(action_names,actions)
 
 def seg_action(action_path,out_path,action):
     print("$$$$$$$$$$$$$$$$$$$$$$$$$$")
-    print(action)
+    #print(action)
     files.make_dir(out_path)
     cats=action.categorize(action_path)
     for frame_path,cat_i in cats:
@@ -77,8 +74,6 @@ def seg_action(action_path,out_path,action):
     return len(cats)
 
 def parse_action(name,raw_action):
-    print(name)
-    print(raw_action)
     action=Action(name)
     raw_cats=[parse_line(line) for line in raw_action.split("\n")]
     for ln in raw_cats:
@@ -87,9 +82,8 @@ def parse_action(name,raw_action):
     return action
 
 def parse_line(line):
-    #print(line)
     raw=line.split(" ")
-    #print(raw)
+    print(raw)
     if(len(raw)==3):
         name=raw[0].replace(":","")
         a=int(raw[1])
