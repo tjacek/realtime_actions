@@ -1,5 +1,21 @@
 #include "remove_outliers.h"
 
+
+void filter_img(std::string in_path,std::string out_path,std::string cloud_path){
+  cv::Mat image = cv::imread(in_path,CV_LOAD_IMAGE_GRAYSCALE);
+  pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud=img_to_pcl(image);
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered=radius_filter(pcloud);
+  //pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered2=sigma_filter(cloud_filtered); 
+  normalize_z(cloud_filtered,255);
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered3= euclidean_clusters( cloud_filtered ); 
+  pcl::io::savePCDFileASCII (cloud_path, *cloud_filtered3);
+  //pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered4=growth_segmentation( cloud_filtered3);
+  pcl::PointXYZ dim=translate(cloud_filtered3);
+  cv::Mat image2=pcl_to_proj(cloud_filtered3,dim);
+  //cv::Mat image3=rescale(image2);
+  cv::imwrite(out_path,image2);
+}
+
 void filter_img(std::string in_path,std::string out_path){
   cv::Mat image = cv::imread(in_path,CV_LOAD_IMAGE_GRAYSCALE);
   pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud=img_to_pcl(image);
@@ -160,12 +176,21 @@ int main(int argc,char ** argv)
 { 
   if(argc <3){
      filter_img("/home/user/reps/realtime_actions/filter/depth.jpg",
-                "/home/user/reps/realtime_actions/filter/out.jpg");
+                "/home/user/reps/realtime_actions/filter/out.jpg",
+                "test_pcd.pcd");
     //std::cout << "Too few arguments" <<std::endl;
     return 1;
   }
+  
   std::string in_path(argv[1]);
   std::string out_path(argv[2]);
   std::cout << in_path << " " << out_path << std::endl;
-  filter_img(in_path,out_path);
+  /*if(argc==3){
+    filter_img(in_path,out_path);
+  }*/
+  if(argc>2){
+    std::string cloud_path(argv[2]);
+    cloud_path+=".pcd";
+    filter_img(in_path,out_path,cloud_path);
+  }
 } 

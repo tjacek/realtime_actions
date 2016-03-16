@@ -9,4 +9,6 @@
 extern pcl::PointCloud<pcl::PointXYZ>::Ptr img_to_pcl(cv::Mat depth_img);
 extern cv::Mat pcl_to_img(pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud,pcl::PointXYZ dim);
 extern cv::Mat pcl_to_img(pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud);
+extern void normalize_z(pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud,int z_max);
+extern cv::Mat pcl_to_proj(pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud,pcl::PointXYZ dim);
 #endif
