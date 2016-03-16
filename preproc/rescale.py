@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 #import utils.files as files
 
 DIM_X=60
@@ -12,7 +13,8 @@ def rescale(in_path,out_path):
         return None
     print(img.shape)
     res = cv2.resize(img,(DIM_X,DIM_Y), interpolation = cv2.INTER_CUBIC)
-    cv2.imwrite(out_path,res)
+    proj=get_projections(res)
+    cv2.imwrite(out_path,proj)
 
 def bounding_box(img):
     ret,thresh = cv2.threshold(img,1,255,cv2.THRESH_BINARY)
@@ -24,6 +26,20 @@ def bounding_box(img):
     x_w=x_0+w
     y_h=y_0+h
     return img[y_0:y_h,x_0:x_w]
+
+def get_projections(img):
+    height,width=img.shape
+    z_max=np.amax(img)
+    print(z_max)
+    norm=float(width) / float(z_max+5)
+    proj=np.zeros((height,3*width))
+    for (x_i, y_i), element in np.ndenumerate(img):
+        z_i=int(float(img[x_i][y_i]) * norm)
+        if(z_i>10):      
+            proj[x_i][y_i]=z_i
+            proj[z_i][y_i+width]=100
+            proj[x_i][z_i+2*width]=100
+    return proj
 
 if __name__ == "__main__":
     rescale("preproc/out.jpg","preproc/rescaled.jpg")
