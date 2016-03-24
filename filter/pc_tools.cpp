@@ -46,12 +46,15 @@ cv::Mat pcl_to_img(pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud){
 cv::Mat pcl_to_img(pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud,pcl::PointXYZ dim){
   std::cout << dim.x;
   cv::Mat img=cv::Mat::zeros(dim.x,dim.y,CV_8UC1);
+  bool normalize_z=false;
   for (size_t i = 0; i < pcloud->points.size (); ++i)
   {
     int x=(int) pcloud->points[i].x ;
     int y=(int) pcloud->points[i].y;
     float z=(float) pcloud->points[i].z;
-    z= ( z/(dim.z+3) )*255.0;
+    if(normalize_z){
+      z= ( z/(dim.z+3) )*255.0;
+    }
    // z= 255.0-z;
     if(x<dim.x && y<dim.y){
       img.at<uchar>(x,y)=(uchar) z;
