@@ -27,3 +27,10 @@ void extract_features( pcl::PointCloud<pcl::PointXYZ>::Ptr cloud){
 
   // pfhs->points.size () should have the same size as the input cloud->points.size ()*
 }
+
+int main(){
+  cv::Mat depth_img=cv::imread("in.jpg");
+  pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud= img_to_pcl(depth_img);
+  extract_features( pcloud);
+  return 0;
+}
