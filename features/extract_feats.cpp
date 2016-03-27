@@ -1,7 +1,28 @@
 #include "extract_feats.h"
 
-void extract_features( pcl::PointCloud<pcl::PointXYZ>::Ptr cloud){
-  pcl::PointCloud<pcl::Normal>::Ptr normals (new pcl::PointCloud<pcl::Normal> ());
+void extract_features(const char * in_path){
+  cv::Mat depth_img=cv::imread(in_path);
+  pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud= img_to_pcl(depth_img);
+  pcl::PointCloud<pcl::Normal>::Ptr normals=compute_normals(pcloud);
+  extract_features(pcloud,normals);
+}
+
+ pcl::PointCloud<pcl::Normal>::Ptr compute_normals(pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud){
+  pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> ne;
+  ne.setInputCloud (pcloud);
+  pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ> ());
+  ne.setSearchMethod (tree);
+
+  // Output datasets
+  pcl::PointCloud<pcl::Normal>::Ptr cloud_normals (new pcl::PointCloud<pcl::Normal>);
+
+  // Use all neighbors in a sphere of radius 3cm
+  ne.setRadiusSearch (0.03);
+  ne.compute (*cloud_normals);
+  return  cloud_normals;
+}
+
+void compute_features( pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,pcl::PointCloud<pcl::Normal>::Ptr normals ){
 
   // Create the PFH estimation class, and pass the input dataset+normals to it
   pcl::PFHEstimation<pcl::PointXYZ, pcl::Normal, pcl::PFHSignature125> pfh;
@@ -29,8 +50,6 @@ void extract_features( pcl::PointCloud<pcl::PointXYZ>::Ptr cloud){
 }
 
 int main(){
-  cv::Mat depth_img=cv::imread("in.jpg");
-  pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud= img_to_pcl(depth_img);
-  extract_features( pcloud);
+  extract_feature("in.jpg");
   return 0;
 }
