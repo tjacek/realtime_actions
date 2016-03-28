@@ -4,7 +4,7 @@ void extract_features(const char * in_path){
   cv::Mat depth_img=cv::imread(in_path);
   pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud= img_to_pcl(depth_img);
   pcl::PointCloud<pcl::Normal>::Ptr normals=compute_normals(pcloud);
-  extract_features(pcloud,normals);
+  compute_VFHS_features(pcloud,normals);
 }
 
  pcl::PointCloud<pcl::Normal>::Ptr compute_normals(pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud){
@@ -22,34 +22,47 @@ void extract_features(const char * in_path){
   return  cloud_normals;
 }
 
-void compute_features( pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,pcl::PointCloud<pcl::Normal>::Ptr normals ){
 
-  // Create the PFH estimation class, and pass the input dataset+normals to it
+void compute_VFHS_features( pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,pcl::PointCloud<pcl::Normal>::Ptr normals ){
+
+  pcl::VFHEstimation<pcl::PointXYZ, pcl::Normal, pcl::VFHSignature308> vfh;
+  vfh.setInputCloud (cloud);
+  vfh.setInputNormals (normals);
+  // alternatively, if cloud is of type PointNormal, do vfh.setInputNormals (cloud);
+
+  // Create an empty kdtree representation, and pass it to the FPFH estimation object.
+  // Its content will be filled inside the object, based on the given input dataset (as no other search surface is given).
+  pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ> ());
+  vfh.setSearchMethod (tree);
+
+  // Output datasets
+  pcl::PointCloud<pcl::VFHSignature308>::Ptr vfhs (new pcl::PointCloud<pcl::VFHSignature308> ());
+
+  // Compute the features
+  vfh.compute (*vfhs);
+  pcl::VFHSignature308 value=vfhs->points[0];
+  std::cout << value <<"\n";
+  // vfhs->points.size () should be of size 1*
+}
+
+void compute_PFH_features( pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,pcl::PointCloud<pcl::Normal>::Ptr normals ){
+
   pcl::PFHEstimation<pcl::PointXYZ, pcl::Normal, pcl::PFHSignature125> pfh;
   pfh.setInputCloud (cloud);
   pfh.setInputNormals (normals);
-  // alternatively, if cloud is of tpe PointNormal, do pfh.setInputNormals (cloud);
-
-  // Create an empty kdtree representation, and pass it to the PFH estimation object.
-  // Its content will be filled inside the object, based on the given input dataset (as no other search surface is given).
+  
   pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ> ());
-  //pcl::KdTreeFLANN<pcl::PointXYZ>::Ptr tree (new pcl::KdTreeFLANN<pcl::PointXYZ> ()); -- older call for PCL 1.5-
   pfh.setSearchMethod (tree);
 
-  // Output datasets
   pcl::PointCloud<pcl::PFHSignature125>::Ptr pfhs (new pcl::PointCloud<pcl::PFHSignature125> ());
 
-  // Use all neighbors in a sphere of radius 5cm
-  // IMPORTANT: the radius used here has to be larger than the radius used to estimate the surface normals!!!
   pfh.setRadiusSearch (0.05);
 
-  // Compute the features
   pfh.compute (*pfhs);
 
-  // pfhs->points.size () should have the same size as the input cloud->points.size ()*
 }
 
 int main(){
-  extract_feature("in.jpg");
+  extract_features("in.jpg");
   return 0;
 }
