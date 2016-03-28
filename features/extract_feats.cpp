@@ -7,7 +7,17 @@ std::vector<float> extract_features(const char * in_path){
   return compute_VFHS_features(pcloud,normals);
 }
 
- pcl::PointCloud<pcl::Normal>::Ptr compute_normals(pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud){
+void save_histogram(const char * out_file, std::vector<float> histogram){
+  std::ofstream myfile;
+  myfile.open (out_file,std::ios::app);
+  for(int i=0;i<histogram.size();i++){
+    myfile << histogram[i] <<" ";
+  }
+  myfile <<"\n";
+  myfile.close();
+}
+
+pcl::PointCloud<pcl::Normal>::Ptr compute_normals(pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud){
   pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> ne;
   ne.setInputCloud (pcloud);
   pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ> ());
@@ -67,6 +77,7 @@ void compute_PFH_features( pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,pcl::PointC
 }
 
 int main(){
-  extract_features("in.jpg");
+  std::vector<float> histogram=extract_features("in.jpg");
+  save_histogram("out.txt", histogram);
   return 0;
 }
