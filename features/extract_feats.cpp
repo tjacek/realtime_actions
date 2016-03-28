@@ -7,11 +7,12 @@ std::vector<float> extract_features(const char * in_path){
   return compute_VFHS_features(pcloud,normals);
 }
 
-void save_histogram(const char * out_file, std::vector<float> histogram){
+void save_histogram(const char * in_file,const char * out_file, std::vector<float> histogram){
   std::ofstream myfile;
   myfile.open (out_file,std::ios::app);
+  myfile << in_file<<"#";
   for(int i=0;i<histogram.size();i++){
-    myfile << histogram[i] <<" ";
+    myfile << histogram[i] <<",";
   }
   myfile <<"\n";
   myfile.close();
@@ -51,7 +52,7 @@ std::vector<float> compute_VFHS_features( pcl::PointCloud<pcl::PointXYZ>::Ptr cl
   // Compute the features
   vfh.compute (*vfhs);
   pcl::VFHSignature308 value=vfhs->points[0];
-  std::cout << value;
+  //std::cout << value;
   std::vector<float> histogram;
   for(int i=0;i< value.descriptorSize();i++){
     histogram.push_back(value.histogram[i]);
@@ -76,8 +77,13 @@ void compute_PFH_features( pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,pcl::PointC
 
 }
 
-int main(){
-  std::vector<float> histogram=extract_features("in.jpg");
-  save_histogram("out.txt", histogram);
+int main(int argc,char ** argv){
+  if(argc < 3){
+    std::vector<float> histogram=extract_features("in.jpg");
+    save_histogram("in.jpg","out.txt", histogram);
+  }else{
+    std::vector<float> histogram=extract_features(argv[1]);
+    save_histogram(argv[1],argv[2], histogram);
+  }
   return 0;
 }
