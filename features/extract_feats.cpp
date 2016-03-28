@@ -1,10 +1,10 @@
 #include "extract_feats.h"
 
-void extract_features(const char * in_path){
+std::vector<float> extract_features(const char * in_path){
   cv::Mat depth_img=cv::imread(in_path);
   pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud= img_to_pcl(depth_img);
   pcl::PointCloud<pcl::Normal>::Ptr normals=compute_normals(pcloud);
-  compute_VFHS_features(pcloud,normals);
+  return compute_VFHS_features(pcloud,normals);
 }
 
  pcl::PointCloud<pcl::Normal>::Ptr compute_normals(pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud){
@@ -17,13 +17,13 @@ void extract_features(const char * in_path){
   pcl::PointCloud<pcl::Normal>::Ptr cloud_normals (new pcl::PointCloud<pcl::Normal>);
 
   // Use all neighbors in a sphere of radius 3cm
-  ne.setRadiusSearch (0.03);
+  ne.setRadiusSearch (5.0);
   ne.compute (*cloud_normals);
   return  cloud_normals;
 }
 
 
-void compute_VFHS_features( pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,pcl::PointCloud<pcl::Normal>::Ptr normals ){
+std::vector<float> compute_VFHS_features( pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,pcl::PointCloud<pcl::Normal>::Ptr normals ){
 
   pcl::VFHEstimation<pcl::PointXYZ, pcl::Normal, pcl::VFHSignature308> vfh;
   vfh.setInputCloud (cloud);
@@ -41,8 +41,12 @@ void compute_VFHS_features( pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,pcl::Point
   // Compute the features
   vfh.compute (*vfhs);
   pcl::VFHSignature308 value=vfhs->points[0];
-  std::cout << value <<"\n";
-  // vfhs->points.size () should be of size 1*
+  std::cout << value;
+  std::vector<float> histogram;
+  for(int i=0;i< value.descriptorSize();i++){
+    histogram.push_back(value.histogram[i]);
+  }
+  return histogram;
 }
 
 void compute_PFH_features( pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,pcl::PointCloud<pcl::Normal>::Ptr normals ){
@@ -56,7 +60,7 @@ void compute_PFH_features( pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,pcl::PointC
 
   pcl::PointCloud<pcl::PFHSignature125>::Ptr pfhs (new pcl::PointCloud<pcl::PFHSignature125> ());
 
-  pfh.setRadiusSearch (0.05);
+  pfh.setRadiusSearch (10.0);
 
   pfh.compute (*pfhs);
 
