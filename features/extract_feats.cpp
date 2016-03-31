@@ -59,10 +59,25 @@ std::vector<float> compute_MOI_features( pcl::PointCloud<pcl::PointXYZ>::Ptr clo
   feature_extractor.getEigenValues (major_value, middle_value, minor_value);
   feature_extractor.getEigenVectors (major_vector, middle_vector, minor_vector);
   feature_extractor.getMassCenter (mass_center);
-  std::cout << moment_of_inertia;
-  return moment_of_inertia;
+ // std::cout << moment_of_inertia;
+  std::vector<float> histogram;
+  //for(int i=0;i<histogram.size();i++){
+
+  //}
+  histogram.push_back(major_value);
+  histogram.push_back( middle_value);
+  histogram.push_back(minor_value);
+  insert_eigen(histogram,major_vector);
+  insert_eigen(histogram,middle_vector);
+  insert_eigen(histogram,minor_vector);
+  return histogram;//moment_of_inertia;
 }
 
+void insert_eigen( std::vector<float> & histogram,Eigen::Vector3f & vector){
+  for(int i=0;i<3;i++){
+     histogram.push_back(vector[i]);
+  }
+}
 
 std::vector<float> compute_VFHS_features( pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,pcl::PointCloud<pcl::Normal>::Ptr normals ){
 

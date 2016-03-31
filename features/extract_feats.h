@@ -15,3 +15,5 @@ extern pcl::PointCloud<pcl::Normal>::Ptr compute_normals(pcl::PointCloud<pcl::Po
 extern void compute_PFH_features( pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,pcl::PointCloud<pcl::Normal>::Ptr normals); 
 extern std::vector<float>  compute_VFHS_features( pcl::PointCloud<pcl::PointXYZ>::Ptr cloud,pcl::PointCloud<pcl::Normal>::Ptr normals );
 extern std::vector<float> compute_MOI_features( pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
+
+extern void insert_eigen( std::vector<float> & histogram,Eigen::Vector3f & vector);
