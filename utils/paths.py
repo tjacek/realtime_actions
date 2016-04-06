@@ -37,6 +37,20 @@ class Path(object):
         str_path=str(self)
         return Path(str_path)
 
+def get_paths(path,filename):
+    if(type(path)==str):
+        path=Path(path)
+    path=path.copy()
+    path.add(filename)
+    return path
+
+def decorator(func):
+    def path_fun(in_str,out_str):
+        in_path=Path(in_str)
+        out_path=Path(out_str)
+        return func(in_path,out_path)
+    return path_fun        
+
 if __name__ == "__main__":
     data="../dataset2/binary"
     path=Path(data)

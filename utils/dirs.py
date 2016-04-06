@@ -4,6 +4,7 @@ import paths
 from natsort import natsorted
 from shutil import copyfile
 
+@paths.decorator
 def copy_dir(in_path,out_path):
     in_files=get_files(in_path,dirs=False)
     print(in_files)
