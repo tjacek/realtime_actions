@@ -14,14 +14,14 @@ class Path(object):
     def replace(self,other_path):
         new_path=self.copy()
         name=other_path.get_name()
-        new_path.set_name(name)
+        new_path.append(name)
         return new_path
 
     def get_name(self):
         return self.items[-1]
 
     def set_name(self,name):
-        self.items[-1]=nam
+        self.items[-1]=name
 
     def add(self,str_path):
         strs=str_path.split("/")
@@ -37,6 +37,11 @@ class Path(object):
         str_path=str(self)
         return Path(str_path)
 
+    def first(self,k):
+        new_path=self.copy()
+        new_path.items=self.items[0:len(self)-k]
+        return new_path
+
 def get_paths(path,filename):
     if(type(path)==str):
         path=Path(path)
@@ -44,12 +49,18 @@ def get_paths(path,filename):
     path.add(filename)
     return path
 
-def decorator(func):
-    def path_fun(in_str,out_str):
+def path_args(func):
+    def path_fun(in_str,out_str): 
         in_path=Path(in_str)
         out_path=Path(out_str)
         return func(in_path,out_path)
     return path_fun        
+
+def str_arg(func):
+    def inner_fun(in_path):
+        in_str=str(in_path)
+        return func(in_str)
+    return inner_fun
 
 if __name__ == "__main__":
     data="../dataset2/binary"
