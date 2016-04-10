@@ -62,6 +62,9 @@ def str_arg(func):
         return func(in_str)
     return inner_fun
 
+def to_paths(files):
+    return [Path(file_i) for file_i in files]
+
 if __name__ == "__main__":
     data="../dataset2/binary"
     path=Path(data)

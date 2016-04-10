@@ -4,6 +4,12 @@ import paths
 from natsort import natsorted
 from shutil import copyfile
 
+def dir_arg(func):
+    def inner_func(dir_path):
+        dirs=get_files(dir_path,dirs=False)
+        return func(dirs)
+    return inner_func
+
 @paths.path_args
 def copy_dir(in_path,out_path):
     in_files=get_files(in_path,dirs=True)
@@ -46,13 +52,13 @@ def is_file(f,path):
     file_path=str(path)+"/"+f
     return io.isfile(file_path)#io.join(path,f))
 
-@paths.str_args
+@paths.str_arg
 def make_dir(path):
     if(not os.path.isdir(path)):
         os.system("mkdir "+path)
 
 if __name__ == "__main__":
-    data="../../dataset6/cats/"
-    copy_dir(data,"test4")
+    path="../../dataset9/"
+    copy_dir(path+"cats2/",path+"actions/")
     #unify_dirs(data,"test2")
     
