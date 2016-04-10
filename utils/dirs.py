@@ -4,6 +4,16 @@ import paths
 from natsort import natsorted
 from shutil import copyfile
 
+def apply_to_files(func):
+    @paths.path_args
+    def inner_func(in_dir,out_dir):
+        in_paths=get_files(in_dir,dirs=False)
+        make_dir(out_dir)
+        out_paths=[ out_dir.replace(in_i)  for in_i in in_paths]
+        for in_i,out_i in zip(in_paths,out_paths):
+            func(in_i,out_i)
+    return inner_func
+
 def dir_arg(func):
     def inner_func(dir_path):
         dirs=get_files(dir_path,dirs=False)
