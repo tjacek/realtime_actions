@@ -1,6 +1,8 @@
 class Path(object):
     def __init__(self, text):
-        self.items=text.split("/")
+        #if(type(text)==Path):
+        #    self.items=str(text).split("/")
+        self.items=str(text).split("/")
 
     def __getitem__(self,i):
         return self.items[i]

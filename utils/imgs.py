@@ -1,7 +1,7 @@
 import numpy as np
 import cv2
 import paths
-from dirs import dir_arg, apply_to_files
+from dirs import dir_arg, ApplyToFiles
 
 class Image(np.ndarray):
     def __new__(cls,name,input_array):
@@ -38,14 +38,15 @@ def save_img(full_path,img):
     img.astype(int)
     cv2.imwrite(full_path,img)
 
-@apply_to_files
+@ApplyToFiles(True)
+@ApplyToFiles(False)
 def rescale(in_path,out_path,new_dim=(60,60)):    
     img=cv2.imread(str(in_path))
     new_img=cv2.resize(img,new_dim)
     cv2.imwrite(str(out_path),new_img)
 
 if __name__ == "__main__":
-    path="actions/pull"
-    rescale(path,"test")
+    path="actions/"
+    rescale(path,"test2")
     #print(len(imgs))
     #unify_dirs(data,"test2")
