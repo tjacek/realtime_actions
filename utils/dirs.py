@@ -4,6 +4,17 @@ import paths
 from natsort import natsorted
 from shutil import copyfile
 
+class ApplyToDirs(object):
+    def __init__(self):
+        self.index=False
+
+    def __call__(self, func):          
+        file_dec=ApplyToFiles(dir_arg=False)
+        file_func=file_dec(func)
+        dir_dec=ApplyToFiles(dir_arg=True)
+        dir_func=dir_dec(file_func)
+        return dir_func
+         
 class ApplyToFiles(object):
     def __init__(self,dir_arg=False):
         self.dir_arg=dir_arg
@@ -11,7 +22,9 @@ class ApplyToFiles(object):
     def __call__(self, func):    
         @paths.path_args
         def inner_func(in_dir,out_dir):
+            print("###")
             in_paths=get_files(in_dir,dirs=self.dir_arg)
+            paths.print_paths(in_paths)
             make_dir(out_dir)
             out_paths=[ out_dir.replace(in_i)  for in_i in in_paths]
             for in_i,out_i in zip(in_paths,out_paths):
@@ -48,8 +61,10 @@ def unify_dirs(in_path,out_path):
         print(str(out_file_i))
         copyfile(str(in_file_i),str(out_file_i))
 
+#@paths.path_args
 def get_files(dir_path,dirs=True,append_path=True):
     d_path=str(dir_path)
+    #print(dir_path.items)
     all_in_dir=os.listdir(d_path)
     if(dirs):    
         files= [f for f in all_in_dir  
@@ -73,6 +88,6 @@ def make_dir(path):
 
 if __name__ == "__main__":
     path="../../dataset9/"
-    copy_dir(path+"cats2/",path+"actions/")
+    unify_dirs(path+"final/",path+"imgs/")
     #unify_dirs(data,"test2")
     

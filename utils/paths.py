@@ -2,7 +2,10 @@ class Path(object):
     def __init__(self, text):
         #if(type(text)==Path):
         #    self.items=str(text).split("/")
-        self.items=str(text).split("/")
+        self.items=[]
+        raw_items=str(text).split("/")
+        for item_i in raw_items:
+            self.append(item_i)
 
     def __getitem__(self,i):
         return self.items[i]
@@ -66,6 +69,11 @@ def str_arg(func):
 
 def to_paths(files):
     return [Path(file_i) for file_i in files]
+
+def print_paths(paths):
+    print("Length of paths " +str(len(paths)))
+    for path_i in paths:
+        print(str(path_i))
 
 if __name__ == "__main__":
     data="../dataset2/binary"
