@@ -5,19 +5,20 @@ from natsort import natsorted
 from shutil import copyfile
 
 class ApplyToDirs(object):
-    def __init__(self):
-        self.index=False
+    def __init__(self,renamed=False):
+        self.renamed=renamed
 
     def __call__(self, func):          
-        file_dec=ApplyToFiles(dir_arg=False)
+        file_dec=ApplyToFiles(dir_arg=False,renamed=self.renamed)
         file_func=file_dec(func)
-        dir_dec=ApplyToFiles(dir_arg=True)
+        dir_dec=ApplyToFiles(dir_arg=True,renamed=False)
         dir_func=dir_dec(file_func)
         return dir_func
          
 class ApplyToFiles(object):
-    def __init__(self,dir_arg=False):
+    def __init__(self,dir_arg=False,renamed=False):
         self.dir_arg=dir_arg
+        self.renamed=renamed
 
     def __call__(self, func):    
         @paths.path_args
@@ -27,9 +28,19 @@ class ApplyToFiles(object):
             paths.print_paths(in_paths)
             make_dir(out_dir)
             out_paths=[ out_dir.replace(in_i)  for in_i in in_paths]
+            if(self.renamed):
+                dir_name=out_dir.get_name()
+                out_paths=self.rename(out_paths,dir_name)
             for in_i,out_i in zip(in_paths,out_paths):
                 func(in_i,out_i)
         return inner_func
+
+    def rename(self,paths,new_name):
+        for i,path_i in enumerate(paths):
+            full_name=new_name+"_"+str(i)+".jpg"
+            print(str(path_i))
+            path_i.set_name(full_name)
+        return paths
 
 def dir_arg(func):
     def inner_func(dir_path):
@@ -40,7 +51,7 @@ def dir_arg(func):
 @paths.path_args
 def copy_dir(in_path,out_path):
     in_files=get_files(in_path,dirs=True)
-    make_dir(str(out_path))
+    make_dir("^^^^^^" + str(out_path))
     for in_file_i in in_files:
     	out_file_i=out_path.replace(in_file_i)
         make_dir(str(out_file_i))
