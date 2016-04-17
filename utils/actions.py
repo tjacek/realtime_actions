@@ -20,18 +20,12 @@ class Action(object):
     def __len__(self):
         return len(self.frames)
 
-    def apply(self,fun,orginal=False):
-        if(orginal):
-            return [fun(frame_i.get_orginal()) for frame_i in self.frames]
-        else:
-            return [ fun(frame_i) for frame_i in self.frames]
+    def apply(self,fun):
+        return [ fun(frame_i) for frame_i in self.frames]
 
-    def apply_temporal(self,fun,orginal=False):
+    def apply_temporal(self,fun):
         img_range=range(len(self)-1)
-        if(orginal):
-            items=[frame_i.get_orginal() for frame_i in self.frames]
-        else:
-            items=self.frames
+        items=self.frames
         return [fun(items[i],items[i+1]) for i in img_range]
 
     def as_numpy(self):

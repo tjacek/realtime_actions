@@ -34,7 +34,6 @@ def img_dec(func):
 @file_dec
 def read_images(file_path):
     img_i=read_raw(file_path)
-    print(img_i.dtype)
     if(img_i!=None):
         #img_i=img_i.astype(float)
         #img_i/=255.0
@@ -44,13 +43,15 @@ def read_images(file_path):
 def read_raw(img_path):
     return cv2.imread(str(img_path),cv2.IMREAD_GRAYSCALE) 
 
+@paths.path_args
 def save_img(out_path,img):
     img=img.get_orginal()
+    #print(img.shape)
     #img*=250.0
-    img.astype(int)
-    out_path.append(img.name)
-    print(str(out_path)+" \n")
-    cv2.imwrite(str(out_path),img)
+    img=img.astype(np.uint8)
+    full_path=out_path.copy().append(img.name)
+    #print(str(full_path)+" \n")
+    cv2.imwrite(str(full_path),img)
 
 @ApplyToFiles(True)
 @ApplyToFiles(False)

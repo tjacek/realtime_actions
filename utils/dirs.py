@@ -48,10 +48,17 @@ def dir_arg(func):
         return func(dirs)
     return inner_func
 
+def file_dec(func):
+    @paths.path_args
+    def inner_func(dir_path):
+        file_paths=get_files(dir_path,dirs=False)
+        return [func(file_i) for file_i in file_paths]
+    return inner_func
+
 @paths.path_args
 def copy_dir(in_path,out_path):
     in_files=get_files(in_path,dirs=True)
-    make_dir("^^^^^^" + str(out_path))
+    make_dir(str(out_path))
     for in_file_i in in_files:
     	out_file_i=out_path.replace(in_file_i)
         make_dir(str(out_file_i))

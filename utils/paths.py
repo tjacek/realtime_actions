@@ -37,6 +37,7 @@ class Path(object):
     def append(self,item):
     	item=item.replace("/","")
         self.items.append(item)
+        return self
 
     def copy(self):	
         str_path=str(self)
