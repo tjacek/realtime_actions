@@ -2,7 +2,6 @@ import files,dirs
 import cv2
 import numpy as np
 import utils.imgs as imgs
-import utils.data
 
 class Action(object):
     def __init__(self,name,frames,cat=None):
@@ -58,4 +57,3 @@ def apply_to_actions(actions,fun):
 
 def dir_cat(action_path,name):
     return action_path.items[-2]
-

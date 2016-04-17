@@ -24,8 +24,7 @@ class Image(np.ndarray):
 @dir_arg
 def read_images(paths,nomalized=True):
     print([str(path_i) for path_i in paths])
-    imgs=[cv2.imread(str(p),cv2.IMREAD_GRAYSCALE) 
-            for p in paths]
+    imgs=[read_raw(path_i) for path_i in paths]
     imgs=[Image(path_i.get_name(),img_i) for img_i,path_i in zip(imgs,paths)
                    if img_i!=None]
     if(nomalized):
@@ -45,8 +44,10 @@ def rescale(in_path,out_path,new_dim=(60,60)):
     new_img=cv2.resize(img,new_dim)
     cv2.imwrite(str(out_path),new_img)
 
+
+
 if __name__ == "__main__":
-    path="actions/"
-    rescale(path,"test2")
+    path="../../dataset9/"
+    rescale(path+"actions",path+"final")
     #print(len(imgs))
     #unify_dirs(data,"test2")
