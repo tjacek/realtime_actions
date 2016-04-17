@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 import utils.imgs as imgs
 from utils.paths import path_args
+from dirs import ApplyToFiles
 
 class Action(object):
     def __init__(self,name,frames,cat=None):
@@ -33,6 +34,17 @@ class Action(object):
 
     def cat_labels(self):
         return [(frame_i,self.cat) for frame_i in self.frames]
+
+def action_dec(func):
+    @ApplyToFiles(dir_arg=True)
+    def transform_action(action_path,out_path):
+        print(out_path)
+        dirs.make_dir(out_path)
+        action=read_action(action_path,False)
+        new_imgs=action.apply(func)
+        [imgs.save_img(out_path,img_i) for img_i in new_imgs]
+    return transform_action
+
 
 @path_args
 def read_action(action_path,print_action=True):
