@@ -67,17 +67,29 @@ def copy_dir(in_path,out_path):
         unify_dirs(str(in_file_i),str(out_file_i))
 
 @paths.path_args
-def unify_dirs(in_path,out_path):
-    dirs_paths=get_files(in_path)
+def unify_dirs(in_path,out_path,index_names=True):
+    #dirs_paths=get_files(in_path,dirs=True)
     make_dir(str(out_path))
-    files_paths=[]
-    for dir_i in dirs_paths:
-        files_paths+=get_files(dir_i,dirs=False)
-    for in_file_i in files_paths:
+    #files_paths=get_files(dir_i,dirs=False)
+    #for dir_i in dirs_paths:
+    #    files_paths+=get_files(dir_i,dirs=False)
+    files_paths=find_all_files(in_path)
+    for i,in_file_i in enumerate(files_paths):
         print(str(in_file_i))
-        out_file_i=out_path.replace(in_file_i)
+        if(index_names):
+            out_file_i=out_path.create("img_"+str(i)+".jpg")
+        else:
+            out_file_i=out_path.replace(in_file_i)
         print(str(out_file_i))
         copyfile(str(in_file_i),str(out_file_i))
+
+def find_all_files(dir_path):
+    dirs=get_files(dir_path,dirs=True)
+    all_dirs=get_files(dir_path,dirs=False)
+    for dir_i in dirs:
+        all_dirs+=find_all_files(dir_i)
+    #all_dirs+=dirs
+    return all_dirs
 
 #@paths.path_args
 def get_files(dir_path,dirs=True,append_path=True):
