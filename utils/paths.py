@@ -55,11 +55,23 @@ def get_paths(path,filename):
     return path
 
 def path_args(func):
-    def path_fun(in_str,out_str): 
-        in_path=Path(in_str)
-        out_path=Path(out_str)
-        return func(in_path,out_path)
-    return path_fun        
+    def path_fun(*args): 
+        #in_path=Path(in_str)
+        #out_path=Path(out_str)
+        path_args=[to_path(str_i) for str_i in args]
+        return func(*path_args)
+    return path_fun   
+
+def to_path(arg):
+    if(type(arg)==str):
+        return Path(arg)
+    return arg    
+#def path_args(func):
+#    def path_fun(in_str,out_str): 
+#        in_path=Path(in_str)
+#        out_path=Path(out_str)
+#        return func(in_path,out_path)
+#    return path_fun        
 
 def str_arg(func):
     def inner_fun(in_path):

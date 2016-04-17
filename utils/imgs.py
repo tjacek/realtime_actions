@@ -1,7 +1,7 @@
 import numpy as np
 import cv2
 import paths
-from dirs import dir_arg, ApplyToFiles
+from dirs import dir_arg,file_dec, ApplyToFiles
 
 class Image(np.ndarray):
     def __new__(cls,name,input_array):
@@ -21,21 +21,36 @@ class Image(np.ndarray):
     def get_orginal(self):
         return np.reshape(self,self.org_dim)
 
-@dir_arg
-def read_images(paths,nomalized=True):
-    print([str(path_i) for path_i in paths])
-    imgs=[read_raw(path_i) for path_i in paths]
-    imgs=[Image(path_i.get_name(),img_i) for img_i,path_i in zip(imgs,paths)
-                   if img_i!=None]
-    if(nomalized):
-        imgs=[img_i/255.0 for img_i in imgs]
-    return imgs
+    def flat2D(self):
+        return self.reshape((1,self.shape[0]))
 
-def save_img(full_path,img):
+def img_dec(func):
+    def inner_func(in_path,out_path):
+        img=read_raw(in_path)
+        new_img=func(img)
+        cv2.imwrite(out_path,new_img)
+    return inner_func
+
+@file_dec
+def read_images(file_path):
+    img_i=read_raw(file_path)
+    print(img_i.dtype)
+    if(img_i!=None):
+        #img_i=img_i.astype(float)
+        #img_i/=255.0
+        return Image(file_path.get_name(),img_i)
+    return None
+
+def read_raw(img_path):
+    return cv2.imread(str(img_path),cv2.IMREAD_GRAYSCALE) 
+
+def save_img(out_path,img):
     img=img.get_orginal()
-    img*=250.0
+    #img*=250.0
     img.astype(int)
-    cv2.imwrite(full_path,img)
+    out_path.append(img.name)
+    print(str(out_path)+" \n")
+    cv2.imwrite(str(out_path),img)
 
 @ApplyToFiles(True)
 @ApplyToFiles(False)
@@ -43,8 +58,6 @@ def rescale(in_path,out_path,new_dim=(60,60)):
     img=cv2.imread(str(in_path))
     new_img=cv2.resize(img,new_dim)
     cv2.imwrite(str(out_path),new_img)
-
-
 
 if __name__ == "__main__":
     path="../../dataset9/"

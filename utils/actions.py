@@ -2,12 +2,12 @@ import files,dirs
 import cv2
 import numpy as np
 import utils.imgs as imgs
+from utils.paths import path_args
 
 class Action(object):
     def __init__(self,name,frames,cat=None):
         self.name=name
-        print(frames[0].shape)
-        self.frames=[frame_i.reshape((1,frame_i.shape[0])) for frame_i in frames]
+        self.frames=[frame_i.flat2D() for frame_i in frames]
         self.cat=cat
         self.seq=None
     
@@ -20,12 +20,19 @@ class Action(object):
     def __len__(self):
         return len(self.frames)
 
-    def apply(self,fun):
-        return [ fun(frame_i) for frame_i in self.frames]
+    def apply(self,fun,orginal=False):
+        if(orginal):
+            return [fun(frame_i.get_orginal()) for frame_i in self.frames]
+        else:
+            return [ fun(frame_i) for frame_i in self.frames]
 
-    def apply_temporal(self,fun):
-        return [fun(self.items[i],self.items[i+1]) 
-                     for i in range(len(self)-1)]
+    def apply_temporal(self,fun,orginal=False):
+        img_range=range(len(self)-1)
+        if(orginal):
+            items=[frame_i.get_orginal() for frame_i in self.frames]
+        else:
+            items=self.frames
+        return [fun(items[i],items[i+1]) for i in img_range]
 
     def as_numpy(self):
         return np.array(self.frames)
@@ -33,7 +40,7 @@ class Action(object):
     def cat_labels(self):
         return [(frame_i,self.cat) for frame_i in self.frames]
 
-
+@path_args
 def read_action(action_path,print_action=True):
     frames= imgs.read_images(action_path)
     if(frames==None):
