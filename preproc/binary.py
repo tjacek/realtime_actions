@@ -22,22 +22,24 @@ class Header(object):
 class RawAction(object):
     def __init__(self,frames):
         self.frames=frames
-        
-    #def save_imgs(self,out_path):
-    #	prefix="action"
-    #	utils.make_dir(out_path)
-    #    imgs=[("act"+str(i),img) for i,img in enumerate(self.frames)]
-    #    utils.save_images(out_path,imgs)
 
+@utils.dirs.ApplyToFiles()
 def from_binary(action_path,out_path):
     raw_action=read_binary(str(action_path))
-    utils.dirs.make_dir(out_path)
     action_name=action_path.get_name()
     action_name=action_name.split(".")[0]
+    utils.dirs.make_dir(out_path)
     for i,frame_i in enumerate(raw_action.frames):     
+        frame_i=standarize(frame_i)
         name=action_name+str(i)+".jpg"
         full_path=out_path.create(name)
         cv2.imwrite(str(full_path),frame_i)
+
+def standarize(img):
+    img_nonzero=np.nonzero(img)
+    z_max=np.min(img[img_nonzero])-1
+    img[img_nonzero]-=z_max
+    return img
 
 def read_binary(action_path):
     with open(action_path, mode='rb') as f:
