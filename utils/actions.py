@@ -35,6 +35,9 @@ class Action(object):
     def cat_labels(self):
         return [(frame_i,self.cat) for frame_i in self.frames]
 
+    def save(self,out_path):
+        [imgs.save_img(out_path,img_i) for img_i in self.frames]
+
 def action_dec(func):
     @ApplyToFiles(dir_arg=True)
     def transform_action(action_path,out_path):
@@ -42,9 +45,8 @@ def action_dec(func):
         dirs.make_dir(out_path)
         action=read_action(action_path,False)
         new_imgs=action.apply(func)
-        [imgs.save_img(out_path,img_i) for img_i in new_imgs]
+        [imgs.save_img(out_path,img_i) for img_i in self.frames]
     return transform_action
-
 
 @path_args
 def read_action(action_path,print_action=True):
@@ -54,7 +56,7 @@ def read_action(action_path,print_action=True):
     if(len(frames)==0):
         return None
     name=action_path.get_name()
-    cat=dir_cat(action_path,name)
+    cat=name_cat(action_path,name)#dir_cat(action_path,name)
     if(print_action):
         print(action_path)
         print("name: "+name)
@@ -70,3 +72,24 @@ def apply_to_actions(actions,fun):
 
 def dir_cat(action_path,name):
     return action_path.items[-2]
+
+def name_cat(action_path,name):
+    return name.split("_")[0]
+
+@path_args
+def action_cats(action_path,out_path):
+    dirs.make_dir(out_path)
+    action_paths=dirs.get_files(action_path,dirs=True)
+    actions=[ read_action(path_i,False) for path_i in action_paths]
+    cats={}
+    for action_i in actions:
+        cats[action_i.cat]=out_path.create(action_i.cat)
+    for cat_i in cats.keys():
+        dirs.make_dir(cats[cat_i])
+    for action_i in actions:
+        name=action_i.name
+        cat_path=cats[action_i.cat]
+        dst_path=cat_path.create(name)
+        print(str(dst_path))
+        action_i.save(dst_path)
+        
