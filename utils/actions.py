@@ -20,14 +20,21 @@ class Action(object):
 
     def __len__(self):
         return len(self.frames)
+    
+    def orginal_imgs(self):
+        return [frame_i.get_orginal() for frame_i in self.frames]
+
+    def orginal_dim(self,i):
+        return self.frames[i].orginal_dim()
 
     def apply(self,fun):
         return [ fun(frame_i) for frame_i in self.frames]
 
     def apply_temporal(self,fun):
         img_range=range(len(self)-1)
-        items=self.frames
-        return [fun(items[i],items[i+1]) for i in img_range]
+        items=self.orginal_imgs()#self.frames
+        raw_images=[fun(items[i],items[i+1]) for i in img_range]
+        return [ imgs.Image(self.frames[i].name,raw_images[i]) for i in img_range]
 
     def as_numpy(self):
         return np.array(self.frames)
@@ -36,7 +43,11 @@ class Action(object):
         return [(frame_i,self.cat) for frame_i in self.frames]
 
     def save(self,out_path):
+        dirs.make_dir(out_path)
         [imgs.save_img(out_path,img_i) for img_i in self.frames]
+
+    def all_names(self):
+        return [name_i for frame_i in self.frames]
 
 def action_dec(func):
     @ApplyToFiles(dir_arg=True)
