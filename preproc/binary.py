@@ -23,14 +23,26 @@ class RawAction(object):
     def __init__(self,frames):
         self.frames=frames
 
+    def normalize(self):
+        act_i=np.array(self.frames,dtype=float)
+        min_value=np.min(act_i[act_i!=0])
+        act_i[act_i!=0]-=min_value+1
+        max_value=np.max(act_i)
+        act_i/=max_value
+        act_i*=128.00
+        act_i[act_i!=0]=128-act_i[act_i!=0]
+        self.frames=[ act_i[i]   for i in range(act_i.shape[0])]
+        #print(type(self.frames[0]))
+
 @utils.dirs.ApplyToFiles()
 def from_binary(action_path,out_path):
     raw_action=read_binary(str(action_path))
+    raw_action.normalize()
     action_name=action_path.get_name()
     action_name=action_name.split(".")[0]
     utils.dirs.make_dir(out_path)
     for i,frame_i in enumerate(raw_action.frames):     
-        frame_i=standarize(frame_i)
+        #frame_i=standarize(frame_i)
         name=action_name+str(i)+".jpg"
         full_path=out_path.create(name)
         cv2.imwrite(str(full_path),frame_i)
