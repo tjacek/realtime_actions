@@ -25,17 +25,26 @@ class Action(object):
         return [frame_i.get_orginal() for frame_i in self.frames]
 
     def orginal_dim(self,i):
-        return self.frames[i].orginal_dim()
+        return self.frames[i].org_dim
 
     def apply(self,fun):
         return [ fun(frame_i) for frame_i in self.frames]
+
+    def transform_action(self,fun):
+        new_frames=self.apply_temporal(fun)
+        return Action(self.name,new_frames)
 
     def apply_temporal(self,fun):
         img_range=range(len(self)-1)
         items=self.orginal_imgs()#self.frames
         raw_images=[fun(items[i],items[i+1]) for i in img_range]
-        return [ imgs.Image(self.frames[i].name,raw_images[i]) for i in img_range]
+        return [ imgs.Image(self.frames[i].name,raw_images[i]) 
+                  for i in img_range]
 
+    def numpy_to_img(self,raw_imgs):
+        return [ imgs.Image(frame_i.name,img_i,frame_i.org_dim) 
+                  for frame_i,img_i in zip(self.frames,raw_imgs)]
+   
     def as_numpy(self):
         return np.array(self.frames)
 
@@ -43,6 +52,7 @@ class Action(object):
         return [(frame_i,self.cat) for frame_i in self.frames]
 
     def save(self,out_path):
+        print(str(out_path))
         dirs.make_dir(out_path)
         [imgs.save_img(out_path,img_i) for img_i in self.frames]
 

@@ -4,8 +4,9 @@ import paths
 from dirs import dir_arg,file_dec, ApplyToFiles
 
 class Image(np.ndarray):
-    def __new__(cls,name,input_array):
-        org_dim=[input_array.shape[0],input_array.shape[1]]
+    def __new__(cls,name,input_array,org_dim=None):
+        if(org_dim==None):
+            org_dim=[input_array.shape[0],input_array.shape[1]]
         input_array=input_array.astype(float) 
         input_array=input_array.flatten()
         obj = np.asarray(input_array).view(cls) 
@@ -19,7 +20,8 @@ class Image(np.ndarray):
         self.org_dim = getattr(obj,'org_dim', None)
 
     def get_orginal(self):
-        return np.reshape(self,self.org_dim)
+        img_i=self.astype(np.uint8)
+        return np.reshape(img_i,self.org_dim)
 
     def flat2D(self):
         return self.reshape((1,self.shape[0]))
@@ -46,11 +48,9 @@ def read_raw(img_path):
 @paths.path_args
 def save_img(out_path,img):
     img=img.get_orginal()
-    #print(img.shape)
     #img*=250.0
     img=img.astype(np.uint8)
     full_path=out_path.copy().append(img.name)
-    #print(str(full_path)+" \n")
     cv2.imwrite(str(full_path),img)
 
 @ApplyToFiles(True)
