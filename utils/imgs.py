@@ -6,7 +6,10 @@ from dirs import dir_arg,file_dec, ApplyToFiles
 class Image(np.ndarray):
     def __new__(cls,name,input_array,org_dim=None):
         if(org_dim==None):
-            org_dim=[input_array.shape[0],input_array.shape[1]]
+            if(type(input_array)==Image):
+                org_dim=input_array.org_dim
+            else:
+                org_dim=[input_array.shape[0],input_array.shape[1]]
         input_array=input_array.astype(float) 
         input_array=input_array.flatten()
         obj = np.asarray(input_array).view(cls) 
@@ -37,8 +40,6 @@ def img_dec(func):
 def read_images(file_path):
     img_i=read_raw(file_path)
     if(img_i!=None):
-        #img_i=img_i.astype(float)
-        #img_i/=255.0
         return Image(file_path.get_name(),img_i)
     return None
 
@@ -55,10 +56,11 @@ def save_img(out_path,img):
 
 @ApplyToFiles(True)
 @ApplyToFiles(False)
-def rescale(in_path,out_path,new_dim=(60,60)):    
+def rescale(in_path,out_path,new_dim=(60,120)):    
     img=cv2.imread(str(in_path))
-    new_img=cv2.resize(img,new_dim)
-    cv2.imwrite(str(out_path),new_img)
+    if(img!=None):
+        new_img=cv2.resize(img,new_dim)
+        cv2.imwrite(str(out_path),new_img)
 
 if __name__ == "__main__":
     path="../../dataset9/"

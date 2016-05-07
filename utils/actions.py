@@ -37,9 +37,9 @@ class Action(object):
     def apply_temporal(self,fun):
         img_range=range(len(self)-1)
         items=self.orginal_imgs()#self.frames
-        raw_images=[fun(items[i],items[i+1]) for i in img_range]
-        return [ imgs.Image(self.frames[i].name,raw_images[i]) 
-                  for i in img_range]
+        raw_imgs=[fun(items[i],items[i+1]) for i in img_range]
+        return [ imgs.Image(self.frames[i].name,img_i) 
+                   for i,img_i in enumerate(raw_imgs)]
 
     def numpy_to_img(self,raw_imgs):
         return [ imgs.Image(frame_i.name,img_i,frame_i.org_dim) 
