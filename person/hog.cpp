@@ -3,20 +3,40 @@
  
 using namespace std;
 using namespace cv;
+
+class Transformation
+{
+public:
+    Mat call(Mat img);
+    void transform(string in_path,string out_path);
+
+};
+
+
+Mat Transformation::call(Mat img){
+  img+=50.0;
+  return img;
+}
+
+void Transformation::transform(string in_path,string out_path){
+    cv::Mat img = cv::imread(in_path,CV_LOAD_IMAGE_GRAYSCALE);
+    cv::Mat img2=this->call(img);
+    cv::imwrite(out_path,img2);
+}
+
  
 int main (int argc, const char * argv[])
-{
-    VideoCapture cap(CV_CAP_ANY);
-    cap.set(CV_CAP_PROP_FRAME_WIDTH, 320);
-    cap.set(CV_CAP_PROP_FRAME_HEIGHT, 240);    
-    if (!cap.isOpened())
-        return -1;
+{   
+
+    Transformation trans;
+    string in_path="in.jpg";
+    string out_path="out_path.jpg";
+    trans.transform(in_path,out_path);
  
-    Mat img;
+    /*Mat img;
     HOGDescriptor hog;
     hog.setSVMDetector(HOGDescriptor::getDefaultPeopleDetector());
  
-    namedWindow("video capture", CV_WINDOW_AUTOSIZE);
     while (true)
     {
         cap >> img;
@@ -48,6 +68,6 @@ int main (int argc, const char * argv[])
         imshow("video capture", img);
         if (waitKey(20) >= 0)
             break;
-    }
+    }*/
     return 0;
 }
