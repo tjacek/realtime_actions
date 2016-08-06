@@ -7,15 +7,23 @@ using namespace cv;
 class Transformation
 {
 public:
+    HOGDescriptor hog;
+
+    Transformation();
     Mat call(Mat img);
     void transform(string in_path,string out_path);
 
 };
 
+Transformation::Transformation(){
+    this->hog.setSVMDetector(HOGDescriptor::getDefaultPeopleDetector());
+}
 
 Mat Transformation::call(Mat img){
-  img+=50.0;
-  return img;
+   vector<Rect> found, found_filtered;
+   this->hog.detectMultiScale(img, found, 0, Size(8,8), Size(32,32), 1.05, 2);
+   cout << found.size();
+   return img;
 }
 
 void Transformation::transform(string in_path,string out_path){
