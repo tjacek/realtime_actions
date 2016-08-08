@@ -1,30 +1,20 @@
 #include "remove_outliers.h"
-
-
-void filter_img(std::string in_path,std::string out_path,std::string cloud_path){
-  cv::Mat image = cv::imread(in_path,CV_LOAD_IMAGE_GRAYSCALE);
-  pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud=img_to_pcl(image);
-  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered=radius_filter(pcloud);
-  //pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered2=sigma_filter(cloud_filtered); 
-  normalize_z(cloud_filtered,255);
-  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered3= euclidean_clusters( cloud_filtered ); 
-  pcl::io::savePCDFileASCII (cloud_path, *cloud_filtered3);
-  //pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered4=growth_segmentation( cloud_filtered3);
-  pcl::PointXYZ dim=translate(cloud_filtered3);
-  cv::Mat image2=pcl_to_proj(cloud_filtered3,dim);
-  //cv::Mat image3=rescale(image2);
-  cv::imwrite(out_path,image2);
-}
+#include "clusters.h"
 
 void filter_img(std::string in_path,std::string out_path){
   cv::Mat image = cv::imread(in_path,CV_LOAD_IMAGE_GRAYSCALE);
   pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud=img_to_pcl(image);
-  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered=radius_filter(pcloud);
+  /*pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered=radius_filter(pcloud);
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered2=sigma_filter(cloud_filtered); 
-  //pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered3= euclidean_clusters( cloud_filtered2 ); 
-  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered3=growth_segmentation( cloud_filtered2);
-  pcl::PointXYZ dim=translate(cloud_filtered3);
-  cv::Mat image2=pcl_to_img(cloud_filtered3,dim);
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered3= euclidean_clusters( cloud_filtered2 ); */
+  std::vector <pcl::PointIndices> points=growth_segmentation( pcloud);
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered3=largest_cluster(points,pcloud);
+
+  //pcl::PointXYZ dim=translate(cloud_filtered3);
+  normalize_z(cloud_filtered3,-1);
+  pcl::PointXYZ dim(image.rows,image.cols,255);
+
+  cv::Mat image2=pcl_to_img( cloud_filtered3,dim,true);
   //cv::Mat image3=rescale(image2);
   cv::imwrite(out_path,image2);
 }
@@ -59,10 +49,10 @@ pcl::PointXYZ translate(pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud){
   dim.y=max_pt.y-min_pt.y;
   dim.z=max_pt.z-min_pt.z;
   Eigen::Matrix4f transform_1 = Eigen::Matrix4f::Identity();
-  std::cout << "Dim "<< dim.x << " " << dim.y << " " << dim.z<<"\n";
+  //std::cout << "Dim "<< dim.x << " " << dim.y << " " << dim.z<<"\n";
   transform_1 (0,3) = -min_pt.x;
   transform_1 (1,3) = -min_pt.y;
-  transform_1 (2,3) = -min_pt.z+1.0;
+  transform_1 (2,3) = -min_pt.z;
   pcl::transformPointCloud (*pcloud, *pcloud, transform_1);
   return dim;
 }
@@ -72,7 +62,7 @@ cv::Mat rescale(cv::Mat img){
   //std::cout << "Transpose "<< img.cols-img.rows  <<"\n";
   bool rescale=false;
   if(rescale && (img.rows-img.cols)<20 ){//img.cols>img.rows){
-    std::cout << "Transpose "<< img.rows-img.cols  <<"\n";
+    //std::cout << "Transpose "<< img.rows-img.cols  <<"\n";
     cv::transpose(img,img);
   }
   cv::Mat dst=cv::Mat::zeros(90,40,CV_8UC1);
@@ -85,7 +75,7 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr euclidean_clusters(pcl::PointCloud<pcl::Poin
   tree->setInputCloud (cloud);
   std::vector<pcl::PointIndices> clusters;
   pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
-  ec.setClusterTolerance (20); // 2cm
+  ec.setClusterTolerance (0.01); // 2cm
   ec.setMinClusterSize (10);
   ec.setMaxClusterSize (25000);
   ec.setSearchMethod (tree);
@@ -96,7 +86,7 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr euclidean_clusters(pcl::PointCloud<pcl::Poin
 }
 
 
-pcl::PointCloud<pcl::PointXYZ>::Ptr growth_segmentation( pcl::PointCloud<pcl::PointXYZ>::Ptr cloud ){
+std::vector <pcl::PointIndices> growth_segmentation( pcl::PointCloud<pcl::PointXYZ>::Ptr cloud ){
   //cout << cloud->points.size() <<"\n";
   pcl::search::Search<pcl::PointXYZ>::Ptr tree = boost::shared_ptr<pcl::search::Search<pcl::PointXYZ> > (new pcl::search::KdTree<pcl::PointXYZ>);
   pcl::PointCloud <pcl::Normal>::Ptr normals (new pcl::PointCloud <pcl::Normal>);
@@ -117,7 +107,7 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr growth_segmentation( pcl::PointCloud<pcl::Po
   reg.setMinClusterSize (30);
   reg.setMaxClusterSize (1000000);
   reg.setSearchMethod (tree);
-  reg.setNumberOfNeighbours (20);
+  reg.setNumberOfNeighbours (10);
   reg.setInputCloud (cloud);
   //reg.setIndices (indices);
   reg.setInputNormals (normals);
@@ -126,58 +116,18 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr growth_segmentation( pcl::PointCloud<pcl::Po
 
   std::vector <pcl::PointIndices> clusters;
   reg.extract (clusters);
-  int max_cls=max_component(clusters);
+  return clusters;
 
-  return extract_cloud(clusters[max_cls],cloud);//extract_cloud(clusters[max_cmp], cloud);
-}
-
-pcl::PointCloud<pcl::PointXYZ>::Ptr large_clusters(std::vector<pcl::PointIndices> clusters,pcl::PointCloud<pcl::PointXYZ>::Ptr cloud){
-  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_cluster (new pcl::PointCloud<pcl::PointXYZ>);
-  int min_cls_size=100;
-  for(int i=0;i<clusters.size();i++){
-    pcl::PointIndices cls=clusters[i];
-    if(min_cls_size<cls.indices.size()){
-      std::cout << "cloud added size:" << cls.indices.size() <<"\n";
-      for (int j=0;j<cls.indices.size();j++){
-        int point_index=cls.indices[j];
-        cloud_cluster->points.push_back (cloud->points[point_index]);
-      } 
-    }
-  }
-  return cloud_cluster;
-}
-
-pcl::PointCloud<pcl::PointXYZ>::Ptr extract_cloud(pcl::PointIndices cls,pcl::PointCloud<pcl::PointXYZ>::Ptr cloud){
-  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_cluster (new pcl::PointCloud<pcl::PointXYZ>);
-  for (int i=0;i<cls.indices.size();i++){
-  //std::vector<int>::const_iterator pit = ind->indices.begin (); pit != ind->indices.end (); ++pit){
-    int point_index=cls.indices[i];
-    cloud_cluster->points.push_back (cloud->points[point_index]);
-  }
-  cloud_cluster->width = cloud_cluster->points.size ();
-  cloud_cluster->height = 1;
-  cloud_cluster->is_dense = true;
-  return cloud_cluster;//cloud_filtered ;
-}
-
-int max_component(std::vector <pcl::PointIndices> clusters){
-  int max=0;
-  int max_cls=0;
-  for(int i=0;i<clusters.size();i++){
-    if( max<clusters[i].indices.size()){
-      max=clusters[i].indices.size();
-      max_cls=i;
-    }
-  }
-  return max_cls;
+  //int max_cls=max_component(clusters);
+  //save_clusters("out_path",clusters);
+  //return extract_cloud(clusters[max_cls],cloud);
 }
 
 int main(int argc,char ** argv)
 { 
   if(argc <3){
      filter_img("/home/user/reps/realtime_actions/filter/depth.jpg",
-                "/home/user/reps/realtime_actions/filter/out.jpg",
-                "test_pcd.pcd");
+                "/home/user/reps/realtime_actions/filter/out.jpg");
     //std::cout << "Too few arguments" <<std::endl;
     return 1;
   }
@@ -191,6 +141,6 @@ int main(int argc,char ** argv)
   if(argc>2){
     std::string cloud_path(argv[2]);
     cloud_path+=".pcd";
-    filter_img(in_path,out_path,cloud_path);
+    filter_img(in_path,out_path);
   }
 } 
