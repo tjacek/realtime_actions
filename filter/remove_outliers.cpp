@@ -8,15 +8,16 @@ void filter_img(std::string in_path,std::string out_path){
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered2=sigma_filter(cloud_filtered); 
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered3= euclidean_clusters( cloud_filtered2 ); */
   std::vector <pcl::PointIndices> points=growth_segmentation( pcloud);
-  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered3=largest_cluster(points,pcloud);
+  //pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered3=largest_cluster(points,pcloud);
 
-  //pcl::PointXYZ dim=translate(cloud_filtered3);
-  normalize_z(cloud_filtered3,-1);
+  std::vector<Cluster> clusters=to_clouds(points,pcloud);
   pcl::PointXYZ dim(image.rows,image.cols,255);
+  save_clusters(out_path,clusters,dim);
+
+  /*normalize_z(cloud_filtered3,-1);
 
   cv::Mat image2=pcl_to_img( cloud_filtered3,dim,true);
-  //cv::Mat image3=rescale(image2);
-  cv::imwrite(out_path,image2);
+  cv::imwrite(out_path,image2);*/
 }
 
 pcl::PointCloud<pcl::PointXYZ>::Ptr radius_filter(pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud){
@@ -117,10 +118,6 @@ std::vector <pcl::PointIndices> growth_segmentation( pcl::PointCloud<pcl::PointX
   std::vector <pcl::PointIndices> clusters;
   reg.extract (clusters);
   return clusters;
-
-  //int max_cls=max_component(clusters);
-  //save_clusters("out_path",clusters);
-  //return extract_cloud(clusters[max_cls],cloud);
 }
 
 int main(int argc,char ** argv)

@@ -1,7 +1,7 @@
 #include "clusters.h"
 
-void save_clusters(std::string out_path,std::vector <pcl::PointIndices> clusters){
-  std::cout << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%";
+void save_clusters(std::string out_path,std::vector<Cluster>& clusters,pcl::PointXYZ dim){
+  std::cout << clusters.size() << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n";
   for(int i=0; i<clusters.size();i++){
     std::stringstream ss;
     ss << i;
@@ -10,7 +10,13 @@ void save_clusters(std::string out_path,std::vector <pcl::PointIndices> clusters
     s="out"+s;
     std::string full_path=out_path+"/"+s;//out_path.replace(;);
     std::cout << full_path << "\n"; 
+    
+    Cluster cluster_i=clusters[i];
 
+    normalize_z(cluster_i,-1);
+
+    cv::Mat image2=pcl_to_img(cluster_i,dim,true);
+    cv::imwrite(full_path,image2);
     //cv::Mat pcl_to_img(pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud,pcl::PointXYZ dim
   }
 }
@@ -25,9 +31,11 @@ std::vector<Cluster> to_clouds(std::vector<pcl::PointIndices> & indices, pcl::Po
   std::vector<Cluster> clusters;
   for(int i=0;i<indices.size();i++){
     pcl::PointIndices index=indices[i];
-    //Cluster cluster_i=extract_cloud(indices[i],cloud);
-    //clusters.push_back (cluster_i);
+    Cluster cluster_i=extract_cloud(indices[i],cloud);
+    clusters.push_back (cluster_i);
+     std::cout << clusters.size() <<"\n";
   }
+  return clusters;
 }
 
 pcl::PointCloud<pcl::PointXYZ>::Ptr extract_cloud(pcl::PointIndices cls,pcl::PointCloud<pcl::PointXYZ>::Ptr cloud){
@@ -36,6 +44,7 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr extract_cloud(pcl::PointIndices cls,pcl::Poi
   //std::vector<int>::const_iterator pit = ind->indices.begin (); pit != ind->indices.end (); ++pit){
     int point_index=cls.indices[i];
     cloud_cluster->points.push_back (cloud->points[point_index]);
+  
   }
   cloud_cluster->width = cloud_cluster->points.size ();
   cloud_cluster->height = 1;
