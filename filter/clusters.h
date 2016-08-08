@@ -7,6 +7,10 @@
 #include <opencv2/highgui/highgui.hpp>
 #include "opencv2/imgproc/imgproc.hpp"
 
+typedef pcl::PointCloud<pcl::PointXYZ>::Ptr Cluster;
+
+extern std::vector<Cluster> to_clouds(std::vector<pcl::PointIndices>& indices, pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
+
 extern pcl::PointCloud<pcl::PointXYZ>::Ptr extract_cloud(pcl::PointIndices,pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
 extern pcl::PointCloud<pcl::PointXYZ>::Ptr largest_cluster(std::vector<pcl::PointIndices> clusters,pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
 	//,pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);

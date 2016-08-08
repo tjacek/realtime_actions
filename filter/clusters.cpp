@@ -18,20 +18,16 @@ void save_clusters(std::string out_path,std::vector <pcl::PointIndices> clusters
 pcl::PointCloud<pcl::PointXYZ>::Ptr largest_cluster(std::vector<pcl::PointIndices> clusters,
                                                     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud){
   int max_cls=max_component(clusters);
-  //,pcl::PointCloud<pcl::PointXYZ>::Ptr cloud){
-  /*pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_cluster (new pcl::PointCloud<pcl::PointXYZ>);
-  int min_cls_size=100;
-  for(int i=0;i<clusters.size();i++){
-    pcl::PointIndices cls=clusters[i];
-    if(min_cls_size<cls.indices.size()){
-      //std::cout << "cloud added size:" << cls.indices.size() <<"\n";
-      for (int j=0;j<cls.indices.size();j++){
-        int point_index=cls.indices[j];
-        cloud_cluster->points.push_back (cloud->points[point_index]);
-      } 
-    }
-  }*/
   return extract_cloud(clusters[max_cls],cloud);;
+}
+
+std::vector<Cluster> to_clouds(std::vector<pcl::PointIndices> & indices, pcl::PointCloud<pcl::PointXYZ>::Ptr cloud){
+  std::vector<Cluster> clusters;
+  for(int i=0;i<indices.size();i++){
+    pcl::PointIndices index=indices[i];
+    //Cluster cluster_i=extract_cloud(indices[i],cloud);
+    //clusters.push_back (cluster_i);
+  }
 }
 
 pcl::PointCloud<pcl::PointXYZ>::Ptr extract_cloud(pcl::PointIndices cls,pcl::PointCloud<pcl::PointXYZ>::Ptr cloud){
