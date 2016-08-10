@@ -7,7 +7,10 @@ void filter_img(std::string in_path,std::string out_path){
   /*pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered=radius_filter(pcloud);
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered2=sigma_filter(cloud_filtered); 
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered3= euclidean_clusters( cloud_filtered2 ); */
-  std::vector <pcl::PointIndices> points=growth_segmentation( pcloud);
+  //std::vector <pcl::PointIndices> points=growth_segmentation( pcloud);
+
+  std::vector <pcl::PointIndices> points=euclidean_clusters( pcloud);
+
   //pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered3=largest_cluster(points,pcloud);
 
   std::vector<Cluster> clusters=to_clouds(points,pcloud);
@@ -71,19 +74,19 @@ cv::Mat rescale(cv::Mat img){
   return dst;
 }
 
-pcl::PointCloud<pcl::PointXYZ>::Ptr euclidean_clusters(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud){
+std::vector<pcl::PointIndices>  euclidean_clusters(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud){
   pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
   tree->setInputCloud (cloud);
   std::vector<pcl::PointIndices> clusters;
   pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
-  ec.setClusterTolerance (0.01); // 2cm
+  ec.setClusterTolerance (1); // 2cm
   ec.setMinClusterSize (10);
   ec.setMaxClusterSize (25000);
   ec.setSearchMethod (tree);
   ec.setInputCloud (cloud);
   ec.extract (clusters);
-  int max_cls=max_component(clusters);
-  return extract_cloud(clusters[max_cls], cloud);
+  
+  return clusters;
 }
 
 

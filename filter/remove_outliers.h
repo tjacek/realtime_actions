@@ -20,5 +20,5 @@ extern pcl::PointCloud<pcl::PointXYZ>::Ptr sigma_filter(pcl::PointCloud<pcl::Poi
 extern pcl::PointXYZ translate(pcl::PointCloud<pcl::PointXYZ>::Ptr pcloud);
 //extern pcl::PointCloud<pcl::PointXYZ>::Ptr growth_segmentation( pcl::PointCloud<pcl::PointXYZ>::Ptr cloud );
 extern std::vector <pcl::PointIndices> growth_segmentation( pcl::PointCloud<pcl::PointXYZ>::Ptr cloud );
-extern pcl::PointCloud<pcl::PointXYZ>::Ptr euclidean_clusters(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
+extern std::vector<pcl::PointIndices>  euclidean_clusters(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
 extern cv::Mat rescale(cv::Mat image);
