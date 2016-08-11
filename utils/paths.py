@@ -1,11 +1,13 @@
+import re
+
 class Path(object):
     def __init__(self, text):
-        #if(type(text)==Path):
-        #    self.items=str(text).split("/")
+        if(type(text)==Path):
+            text=str(text)
+        else:
+            text=re.sub(r'(//)+','/',text)
         self.items=[]
-        raw_items=str(text).split("/")
-        for item_i in raw_items:
-            self.append(item_i)
+        self.add(str(text))
 
     def __getitem__(self,i):
         return self.items[i]
@@ -13,8 +15,23 @@ class Path(object):
     def __len__(self):
         return len(self.items)
 
+    def __add__(self, other):
+        copy=self.copy()
+        if(type(other)==list):
+            copy.append(other)
+        if(type(other)==Path):
+            copy.append(other.items)
+        return copy
+
     def __str__(self):
-        return "/".join(self.items)	
+        s="/".join(self.items)  
+        s=re.sub(r'(//)+','/',s)
+        return s
+
+    def exchange(self,old,new):
+        str_path=str(self)
+        str_path=str_path.replace(old,new)
+        return Path(str_path)
 
     def replace(self,other_path):
         new_path=self.copy()
@@ -27,19 +44,27 @@ class Path(object):
 
     def set_name(self,name):
         self.items[-1]=name
+        return self
 
     def add(self,str_path):
         strs=str_path.split("/")
         for str_i in strs:
             if(str_i!=''):
                 self.append(str_i)
+    
+    def append(self,items,copy=False):
+        if(copy):
+            path_i=self.copy()
+        else:
+            path_i=self
+        if(type(items)==str):
+            items=[items]
+        for item_i in items:
+            item=item_i.replace("/","")
+            path_i.items.append(item)
+        return path_i
 
-    def append(self,item):
-    	item=item.replace("/","")
-        self.items.append(item)
-        return self
-
-    def copy(self):	
+    def copy(self): 
         str_path=str(self)
         return Path(str_path)
 
@@ -66,13 +91,7 @@ def path_args(func):
 def to_path(arg):
     if(type(arg)==str):
         return Path(arg)
-    return arg    
-#def path_args(func):
-#    def path_fun(in_str,out_str): 
-#        in_path=Path(in_str)
-#        out_path=Path(out_str)
-#        return func(in_path,out_path)
-#    return path_fun        
+    return arg          
 
 def str_arg(func):
     def inner_fun(in_path):

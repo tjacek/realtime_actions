@@ -2,6 +2,7 @@ import sys,os
 sys.path.append(os.path.abspath('../realtime_actions'))
 import cv2
 import utils.imgs
+import utils.dirs
 from skimage.feature import hog
 import knn
 
@@ -10,16 +11,12 @@ class FindPerson(object):
         pos_inst=self.get_features(in_path)[0]
         self.detector=knn.LazyCls(pos_inst)
 
-    def __call__(self,in_path,out_path):
+    def __call__(self,in_path):
         feat,candidates=self.get_features(in_path)
         res=self.detector.best_match(feat)
         correct_img=candidates[res]
-        print(correct_img.shape)
-        cv2.imwrite(out_path,correct_img.get_orginal())
-        #print(res)
-        #for feat_i in feat:
-        #    print(feat_i.shape)
-        #    print(feat_i[feat_i!=0])
+        return correct_img
+        #print(correct_img.shape)
 
     def get_features(self,in_path):
         candidates=utils.imgs.read_images(in_path)
@@ -34,4 +31,12 @@ class FindPerson(object):
         return fd
 
 find_person=FindPerson('person/train')
-find_person('person/in','out_path.jpg')
+
+@utils.dirs.apply_to_dirs
+def find(in_path,out_path):
+    img_i=find_person(in_path)
+    cv2.imwrite(str(out_path),img_i.get_orginal())
+
+#find_person('person/in','out_path.jpg')
+#find_person= utils.dirs.ApplyToFiles(find_person)
+find('../dataset6/segment','../dataset6/person')
