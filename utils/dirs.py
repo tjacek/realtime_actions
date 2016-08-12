@@ -5,17 +5,20 @@ from natsort import natsorted
 from shutil import copyfile
 from sets import Set
 
-class ApplyToDirs(object):
-    def __init__(self,renamed=False):
-        self.renamed=renamed
+def apply_to_files(func):
+    @paths.path_args
+    def inner_func(*args):
+        old_path=str(args[0])
+        new_path=str(args[1])
+        other_args=args[2:]
+        in_paths=all_files(old_path)
+        out_paths=[path_i.exchange(old_path,new_path) 
+                      for path_i in in_paths]
+        make_dirs(new_path,out_paths)              
+        for in_i,out_i in zip(in_paths,out_paths):
+            func(in_i,out_i,*other_args)
+    return inner_func    
 
-    def __call__(self, func):          
-        file_dec=ApplyToFiles(dir_arg=False,renamed=self.renamed)
-        file_func=file_dec(func)
-        dir_dec=ApplyToFiles(dir_arg=True,renamed=False)
-        dir_func=dir_dec(file_func)
-        return dir_func
-         
 def apply_to_dirs( func):    
     @paths.path_args
     def inner_func(*args):
