@@ -30,7 +30,7 @@ def compute(img_i):
                     cells_per_block=(1, 1), visualise=False)
     return fd
 
-find_person=FindPerson('person/train')
+#find_person=FindPerson('person/train')
 
 @utils.dirs.apply_to_dirs
 def find(in_path,out_path):
@@ -39,4 +39,4 @@ def find(in_path,out_path):
 
 #find_person('person/in','out_path.jpg')
 #find_person= utils.dirs.ApplyToFiles(find_person)
-find('../dataset6/segment','../dataset6/person')
+#find('../dataset6/segment','../dataset6/person')
