@@ -12,23 +12,23 @@ class FindPerson(object):
         self.detector=knn.LazyCls(pos_inst)
 
     def __call__(self,in_path):
-        feat,candidates=self.get_features(in_path)
+        feat,candidates=get_features(in_path)
         res=self.detector.best_match(feat)
         correct_img=candidates[res]
         return correct_img
         #print(correct_img.shape)
 
-    def get_features(self,in_path):
-        candidates=utils.imgs.read_images(in_path)
-        feat=[ self.compute(img_i)
+def get_features(in_path):
+    candidates=utils.imgs.read_images(in_path)
+    feat=[ compute(img_i)
                 for img_i in candidates]
-        return feat,candidates
+    return feat,candidates
 
-    def compute(self,img_i):
-    	img2D=img_i.get_orginal()
-        fd = hog(img2D, orientations=8, pixels_per_cell=(24, 24),
+def compute(img_i):
+    img2D=img_i.get_orginal()
+    fd = hog(img2D, orientations=8, pixels_per_cell=(24, 24),
                     cells_per_block=(1, 1), visualise=False)
-        return fd
+    return fd
 
 find_person=FindPerson('person/train')
 
