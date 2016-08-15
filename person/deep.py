@@ -10,7 +10,7 @@ import hog
 import copy
 
 class DeepCls(object):
-    def __init__(self,n_cats=2,input_size=1040):
+    def __init__(self,n_cats=2,input_size=1040,k=1):
         self.net1 = NeuralNet(
             layers=[  
                     ('input', layers.InputLayer),
@@ -30,6 +30,18 @@ class DeepCls(object):
             max_epochs=2500, 
             verbose=1, 
         )
+        self.k=k
+
+    def __call__(self,hog_desc):
+        hog_desc=np.expand_dims(hog_desc,0)
+        prob=self.net1.predict_proba(hog_desc)
+        prob=prob.flatten()
+        return prob[self.k]
+
+def load_cls(cls_path='person/nn'):
+    deep_cls=DeepCls()
+    deep_cls.net1.load_params_from(cls_path)
+    return deep_cls
 
 def train_cls(in_path='person/data',out_path='person/nn'):
     x,y=read_dataset(in_path)
@@ -56,5 +68,5 @@ def hog_dataset(raw_data,cat):
 
 if __name__ == "__main__":
     train_cls()
-#img_i=np.expand_dims(img_i,1)
-#print(net1.predict_proba(img_i))
+    #deep_cls=load_cls()
+    #print(dir(deep_cls))
