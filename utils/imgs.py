@@ -1,7 +1,10 @@
+import sys,os
+sys.path.append(os.path.abspath('../realtime_actions'))
 import numpy as np
 import cv2
 import paths
-from dirs import dir_arg,file_dec, ApplyToFiles
+import utils.dirs
+from utils.dirs import dir_arg,file_dec
 
 class Image(np.ndarray):
     def __new__(cls,name,input_array,org_dim=None):
@@ -38,24 +41,27 @@ def img_dec(func):
 
 @file_dec
 def read_images(file_path):
-    img_i=read_raw(file_path)
+    img_i=read_raw(str(file_path))
     if(img_i!=None):
         return Image(file_path.get_name(),img_i)
-    return None
+    raise ValueError('img '+str(file_path) +' not found ')
+    #return None
 
 def read_raw(img_path):
     return cv2.imread(str(img_path),cv2.IMREAD_GRAYSCALE) 
 
 @paths.path_args
-def save_img(out_path,img):
+def save_img(out_path,img,add_name=True):
     img=img.get_orginal()
     #img*=250.0
     img=img.astype(np.uint8)
-    full_path=out_path.copy().append(img.name)
+    if(add_name):
+        full_path=out_path.copy().append(img.name)
+    else:
+        full_path=out_path
     cv2.imwrite(str(full_path),img)
 
-@ApplyToFiles(True)
-@ApplyToFiles(False)
+@utils.dirs.apply_to_files
 def rescale(in_path,out_path,new_dim=(60,120)):    
     img=cv2.imread(str(in_path))
     if(img!=None):
@@ -63,7 +69,6 @@ def rescale(in_path,out_path,new_dim=(60,120)):
         cv2.imwrite(str(out_path),new_img)
 
 if __name__ == "__main__":
-    path="../../dataset9/"
-    rescale(path+"actions",path+"final")
-    #print(len(imgs))
-    #unify_dirs(data,"test2")
+    in_path="/../dataset6/bounded"
+    out_path="/../dataset6/scaled"
+    rescale(paths.Path(in_path),paths.Path(out_path))
