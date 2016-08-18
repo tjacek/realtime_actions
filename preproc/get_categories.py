@@ -1,9 +1,17 @@
+import sys,os
+sys.path.append(os.path.abspath('../realtime_actions'))
 import utils.dirs as dirs
 import utils.files as files
 import utils.text as text
 from shutil import copyfile
 import re
 from utils.paths import path_args,str_arg
+
+class ActionDatset(object):
+    def __init__(self, actions):
+        self.actions=actions
+
+        
 
 class ActionDict(object):
     def __init__(self,name):
@@ -23,13 +31,13 @@ class ActionDict(object):
         print("&&&&&&&&&&&&&&&&&&&&")
         frame_names=dirs.get_files(action_path,dirs=False)
         cats=[self.get_category(name_i) for name_i in frame_names]
-        cat_frames=zip(frame_names,cats)
-        cat_frames=[ (frame_path,cat_i) for frame_path,cat_i in cat_frames
+        cat_frames=[ (frame_path,cat_i) 
+                        for frame_path,cat_i in zip(frame_names,cats)
                                 if cat_i!=None]
         return cat_frames
 
     def get_category(self,frame_name):
-        print(str(frame_name))
+        #print(str(frame_name))
         id=text.extract_number(frame_name)
         for cat_i in self.data.keys():
             a,b=self.data[cat_i]
@@ -47,27 +55,41 @@ class ActionDict(object):
 
 @path_args
 def extract(action_path,out_path,cat_path):
-    actions_info=parse_info(cat_path)
-    actions=[parse_action(name_i,action_i) 
-             for name_i,action_i in actions_info
-                                if action_i!='']
-    
-    print(actions[0].name)
-    [seg_action(action_path,out_path,act_i) for act_i in actions]
-
+    dirs.make_dir(out_path)
+    actions=parse_info(cat_path)
+    print(str(actions[0]))   
+    [select_frames(action_path,out_path,act_i) for act_i in actions]
+        
 @str_arg
 def parse_info(cat_path):
+    pattern = re.compile(r"s\d+_e\d+\n")
     txt=files.read_file(cat_path)
     txt=files.array_to_txt(txt)
-    pattern = re.compile(r"s\d+_e\d+\n")
     action_names=re.findall(pattern, txt)
-    actions=pattern.split(txt)
-    del actions[0]
-    return zip(action_names,actions)
+    raw_actions=pattern.split(txt)
+    del raw_actions[0]
+    actions=[parse_action(name_i,action_i)
+        for name_i,action_i in zip(action_names,raw_actions)
+            if action_i!='']
+    return actions
+
+def select_frames(action_path,out_path,action_dict):
+    print(action_dict.name)
+    action_path=action_path.create(action_dict.name)
+    out_path=out_path.create(action_dict.name)
+    for in_path_i,cat_i in action_dict.categorize(action_path):
+        #dst_path=out_path.create(action_dict.name)
+        dirs.make_dir(out_path)
+        dst_path_i=out_path.replace(in_path_i)
+        print(str(in_path_i))
+        print(str(dst_path_i))
+        copyfile(str(in_path_i), str(dst_path_i))
 
 def seg_action(action_path,out_path,action_dict):
     action_path=action_path.create(action_dict.name)
     out_path=out_path.create(action_dict.name)
+    print(str(action_path))
+    print(str(out_path))
     cats=action_dict.categorize(action_path)
     cat_dict={}
     for cat_i in action_dict.data.keys():
@@ -100,3 +122,9 @@ def parse_line(line):
         b=int(raw[2])
         return name,(a,b)
     return None
+
+if __name__ == "__main__":
+    action_path='../dataset8/ransac2'
+    out_path='../dataset8/select'
+    cat_path='preproc/cats.txt'
+    extract(action_path,out_path,cat_path)
