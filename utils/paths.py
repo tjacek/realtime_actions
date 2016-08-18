@@ -4,8 +4,10 @@ class Path(object):
     def __init__(self, text):
         if(type(text)==Path):
             text=str(text)
-        else:
+        elif(type(text)==str):
             text=re.sub(r'(//)+','/',text)
+        else:
+            raise Exception('path or str required '+str(type(text)))
         self.items=[]
         self.add(str(text))
 
@@ -27,6 +29,11 @@ class Path(object):
         s="/".join(self.items)  
         s=re.sub(r'(//)+','/',s)
         return s
+
+    def create(self,name):
+        new_path=self.copy()#Path(str(self))
+        new_path.append(name)
+        return new_path
 
     def exchange(self,old,new):
         str_path=str(self)
