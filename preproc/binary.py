@@ -1,7 +1,10 @@
+import sys,os
+sys.path.append(os.path.abspath('../realtime_actions'))
 import struct
 import numpy as np 
-import utils.dirs
 import cv2
+import utils.dirs
+import utils.dirs
 
 class Header(object):
    def __init__(self,n_frames,width,height):
@@ -34,7 +37,7 @@ class RawAction(object):
         self.frames=[ act_i[i]   for i in range(act_i.shape[0])]
         #print(type(self.frames[0]))
 
-@utils.dirs.ApplyToFiles()
+@utils.dirs.apply_to_files
 def from_binary(action_path,out_path):
     raw_action=read_binary(str(action_path))
     raw_action.normalize()
@@ -82,4 +85,4 @@ def read_frame(i,int_action,hd):
     return frame
 
 if __name__ == "__main__":
-    from_binary("preproc/action.bin","preproc/not_raw")
+    from_binary("../dataset3/raw","../dataset3/depth")
