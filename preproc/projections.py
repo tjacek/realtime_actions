@@ -13,13 +13,15 @@ def apply_projection(in_path,out_path):
     proj_img=project_img(img_i)
     cv2.imwrite(str(out_path),proj_img)
 
-def project_img(img):
+def project_img(img,new_dim=(60,60)):
     img_xy=proj_xy(img)
     img_zy=proj_zy(img)
     img_xz=proj_xz(img)
     all_imgs=[img_xy,img_zy,img_xz]
     all_imgs=[ clean(img_i) for img_i in all_imgs]
-    proj_img=all_imgs[-2]#np.concatenate([img_xy,img_zy,img_xy])
+    all_imgs=[ cv2.resize(img_i,new_dim, interpolation = cv2.INTER_CUBIC)
+                for img_i in all_imgs]
+    proj_img=np.concatenate(all_imgs)
     return proj_img
 
 def proj_xy(img):
@@ -48,9 +50,9 @@ def proj_xz(img):
     return img_zy
 
 def clean(raw_img):
-    kernel=np.ones((3,3))
-    smooth_img=cv2.filter2D(raw_img,kernel)
-    ret,binary_img=cv2.threshold(img,1,255,cv2.THRESH_BINARY)
+    smooth_img=cv2.blur(raw_img,(5,5))
+    smooth_img=smooth_img.astype(np.uint8)
+    ret,binary_img=cv2.threshold(smooth_img,1,255,cv2.THRESH_BINARY)
     return binary_img
 
 if __name__ == "__main__":
