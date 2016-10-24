@@ -5,7 +5,7 @@ import cv2
 import utils.dirs
 import utils.imgs
 
-ONE=30.0
+ONE=80.0
 
 @utils.dirs.apply_to_files
 def apply_projection(in_path,out_path):
@@ -15,13 +15,16 @@ def apply_projection(in_path,out_path):
     proj_img=project_img(img_i)
     cv2.imwrite(str(out_path),proj_img)
 
-def project_img(img,new_dim=(60,60)):
+def project_img(img,new_dim=(60,60),xy_proj=False):
     #img_xy=proj_xy(img)
     img_zy=proj_zy(img)
     img_xz=proj_xz(img)
     all_imgs=[img_zy,img_xz] #img_xy]
     all_imgs=[ clean(img_i) for img_i in all_imgs]
-    all_imgs.append(img)
+    if(xy_proj):
+        all_imgs.append(proj_xy(img))
+    else:
+        all_imgs.append(img)
     all_imgs=[ cv2.resize(img_i,new_dim, interpolation = cv2.INTER_CUBIC)
                 for img_i in all_imgs]
     proj_img=np.concatenate(all_imgs)
@@ -61,6 +64,6 @@ def clean(raw_img):
     return binary_img
 
 if __name__ == "__main__":
-    in_path='../dataset0/bounded'
-    out_path='../dataset0/proj'
+    in_path='../dane4/scaled'
+    out_path='../dane4/proj'
     apply_projection(in_path,out_path)

@@ -55,6 +55,6 @@ def slice_img(p1,p2,img_i):
     return img_i[p1[1]:p2[1],p1[0]:p2[0]]
 
 if __name__ == "__main__":
-    in_path='../dataset0/depth'
-    out_path='../dataset0/bounded'
-    bound_img(in_path,out_path)
+    in_path='../dane4/selected'
+    out_path='../dane4/bounded'
+    bound_action(in_path,out_path)
